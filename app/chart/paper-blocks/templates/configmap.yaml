@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: paper-blocks-env
+  labels: {{- include "pb.labels" . | nindent 4 }}
+data:
+  # Chỉ chứa cấu hình KHÔNG bí mật. Các secret nằm trong Secret {{ .Values.existingSecret }}.
+  ENABLE_PASSWORD_LOGIN: {{ .Values.passwordLogin | quote }}
+  SEED_DEMO: {{ .Values.api.seedDemo | quote }}
+  APP_VERSION: {{ .Values.api.image.tag | quote }}
+  TRUSTED_PROXIES: {{ .Values.api.trustedProxies | quote }}
+  COOKIE_SECURE: {{ .Values.github.cookieSecure | quote }}
+  GITHUB_CLIENT_ID: {{ .Values.github.clientId | quote }}
+  GITHUB_REDIRECT_URL: {{ .Values.github.redirectUrl | quote }}
+  ADMIN_GITHUB_LOGIN: {{ .Values.github.adminLogin | quote }}
+  FRONTEND_URL: {{ .Values.github.frontendUrl | quote }}

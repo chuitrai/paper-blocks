@@ -1,0 +1,51 @@
+# Giá trị MẶC ĐỊNH, an toàn cho môi trường nhẹ (preview). Giá trị thật của môi trường prod nằm ở
+# config repo (values-prod.yaml), KHÔNG sửa tại đây. Tuyệt đối không đặt secret trong file values.
+
+# Tên Secret chứa JWT_SECRET, USER_PASSWORD, ADMIN_PASSWORD, GITHUB_CLIENT_SECRET (cái nào dùng thì có).
+# Secret tạo bằng kubectl, không đi qua git:
+#   kubectl -n <ns> create secret generic paper-blocks-secrets --from-literal=JWT_SECRET=...
+existingSecret: paper-blocks-secrets
+
+api:
+  image:
+    repository: chuitrai2901/paper-blocks-api
+    tag: "0.1.0"          # CI sẽ sửa đúng dòng này trong config repo
+    pullPolicy: IfNotPresent
+  replicas: 1             # KHÔNG tăng: SQLite một người ghi và rate limit nằm trong bộ nhớ từng pod
+  resources:
+    requests: {cpu: 50m, memory: 64Mi}
+    limits: {cpu: 300m, memory: 192Mi}
+  seedDemo: false         # true = nạp 9 paper DevOps mẫu khi DB trống
+  # IP được tin khi đọc X-Forwarded-For. 10.244.0.0/16 là dải pod (nginx nằm trong đó).
+  trustedProxies: "10.244.0.0/16"
+
+# Đăng nhập mật khẩu CHỈ để chạy ma trận kiểm thử barem. Tắt khi đã có GitHub OAuth.
+passwordLogin: false
+
+github:
+  clientId: ""            # để trống = tắt đăng nhập GitHub (secret nằm trong existingSecret)
+  redirectUrl: ""         # http://<ip>:<nodePort>/api/v1/auth/github/callback
+  adminLogin: ""
+  frontendUrl: "/"
+  cookieSecure: false     # true khi đã có HTTPS (phase 9)
+
+web:
+  image:
+    repository: chuitrai2901/paper-blocks-web
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  resources:
+    requests: {cpu: 10m, memory: 16Mi}
+    limits: {cpu: 100m, memory: 64Mi}
+  service:
+    type: NodePort        # phase 9 chuyển sang ClusterIP + Ingress
+    nodePort: 30080
+    # Local giữ nguyên IP thật của client (rate limit theo IP cần cái này). Hệ quả: chỉ truy cập được
+    # qua IP của node có pod web (worker), không qua IP master.
+    externalTrafficPolicy: Local
+
+persistence:
+  enabled: true           # false = emptyDir (mất dữ liệu khi pod chết): dùng cho preview env
+  size: 1Gi
+  storageClass: ""        # rỗng = StorageClass mặc định của cụm (local-path)

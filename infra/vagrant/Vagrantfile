@@ -1,0 +1,60 @@
+# -*- mode: ruby -*-
+# Cluster Kubernetes 1 master + 1 worker trên VirtualBox (host Windows/Git Bash).
+# Tuỳ biến bằng biến môi trường, ví dụ (Git Bash):
+#   WORKER_MEM=4096 vagrant up
+require "etc"
+
+K8S_MINOR   = ENV.fetch("K8S_MINOR", "1.36")          # minor của Kubernetes
+MASTER_IP   = ENV.fetch("MASTER_IP", "192.168.56.10")
+WORKER_IP   = ENV.fetch("WORKER_IP", "192.168.56.11")
+MASTER_MEM  = ENV.fetch("MASTER_MEM", "4096").to_i
+MASTER_CPUS = ENV.fetch("MASTER_CPUS", "2").to_i
+WORKER_MEM  = ENV.fetch("WORKER_MEM", "6144").to_i
+WORKER_CPUS = ENV.fetch("WORKER_CPUS", "3").to_i
+
+NODES = [
+  { name: "master", host: "k8s-master", ip: MASTER_IP, mem: MASTER_MEM, cpus: MASTER_CPUS },
+  { name: "worker", host: "k8s-worker", ip: WORKER_IP, mem: WORKER_MEM, cpus: WORKER_CPUS },
+]
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "bento/ubuntu-22.04"
+  config.vm.box_check_update = false
+  config.vm.boot_timeout = 900          # máy yếu/Hyper-V bật: boot chậm hơn mặc định 300s
+
+  # /vagrant = thư mục này. Master ghi join-command.sh + admin.conf vào đây
+  # để worker/host đọc. Hai file này chứa secret -> đã nằm trong .gitignore.
+  config.vm.synced_folder ".", "/vagrant"
+
+  NODES.each do |n|
+    config.vm.define n[:name], primary: n[:name] == "master" do |node|
+      node.vm.hostname = n[:host]
+      node.vm.network "private_network", ip: n[:ip]   # NIC thứ 2 (host-only), dùng làm node-ip
+
+      node.vm.provider "virtualbox" do |vb|
+        vb.name   = "k8s-#{n[:name]}"
+        vb.memory = n[:mem]
+        vb.cpus   = n[:cpus]
+        vb.linked_clone = true                         # clone từ box, tiết kiệm ~3GB/VM
+        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]  # DNS qua host, tránh treo apt/pull
+        vb.customize ["modifyvm", :id, "--ioapic", "on"]
+      end
+
+      env = {
+        "K8S_MINOR"   => K8S_MINOR,
+        "NODE_IP"     => n[:ip],
+        "MASTER_IP"   => MASTER_IP,
+        "WORKER_IP"   => WORKER_IP,
+        "MASTER_HOST" => "k8s-master",
+        "WORKER_HOST" => "k8s-worker",
+      }
+
+      node.vm.provision "bootstrap", type: "shell", path: "bootstrap.sh", env: env
+      if n[:name] == "master"
+        node.vm.provision "init-master", type: "shell", path: "init_master.sh", env: env
+      else
+        node.vm.provision "join-worker", type: "shell", path: "join_worker.sh", env: env
+      end
+    end
+  end
+end

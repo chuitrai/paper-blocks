@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  labels:
+    {{- include "pb.labels" . | nindent 4 }}
+    app.kubernetes.io/name: api
+spec:
+  replicas: {{ .Values.api.replicas }}
+  # Recreate: dừng pod cũ RỒI mới chạy pod mới. RollingUpdate sẽ có lúc hai pod cùng ghi một file SQLite.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: {{- include "pb.selector" (dict "name" "api" "root" .) | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "pb.selector" (dict "name" "api" "root" .) | nindent 8 }}
+      annotations:
+        # Đổi ConfigMap thì pod tự khởi động lại (env chỉ được đọc lúc pod bắt đầu).
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        # Dành cho Prometheus ở phase 7.
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: /metrics
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile: {type: RuntimeDefault}
+      terminationGracePeriodSeconds: 20   # ứng dụng tắt êm trong 10s (graceful shutdown)
+      containers:
+        - name: api
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          ports:
+            - {name: http, containerPort: 8080}
+          envFrom:
+            - configMapRef: {name: paper-blocks-env}
+            # Thiếu Secret thì pod báo CreateContainerConfigError: lỗi rõ ràng hơn là chạy với secret rỗng.
+            - secretRef: {name: {{ .Values.existingSecret }}}
+          readinessProbe:
+            httpGet: {path: /readyz, port: http}
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: {path: /healthz, port: http}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources: {{- toYaml .Values.api.resources | nindent 12 }}
+          securityContext:
+            {{- include "pb.containerSecurity" . | nindent 12 }}
+            readOnlyRootFilesystem: true   # chỉ ghi được vào /data và /tmp
+          volumeMounts:
+            - {name: data, mountPath: /data}
+            - {name: tmp, mountPath: /tmp}   # gin đệm upload lớn ra đĩa tạm
+      volumes:
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim: {claimName: paper-blocks-data}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  labels:
+    {{- include "pb.labels" . | nindent 4 }}
+    app.kubernetes.io/name: api
+spec:
+  type: ClusterIP
+  selector: {{- include "pb.selector" (dict "name" "api" "root" .) | nindent 4 }}
+  ports:
+    - {name: http, port: 8080, targetPort: http}

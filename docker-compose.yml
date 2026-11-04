@@ -1,0 +1,32 @@
+# Chạy local: sao chép .env.example thành .env, đặt giá trị, rồi `docker compose up --build`.
+services:
+  api:
+    build: ./app/api
+    ports:
+      - "8080:8080"
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?đặt JWT_SECRET trong .env}
+      USER_PASSWORD: ${USER_PASSWORD:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ENABLE_PASSWORD_LOGIN: ${ENABLE_PASSWORD_LOGIN:-false}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      GITHUB_REDIRECT_URL: ${GITHUB_REDIRECT_URL:-}
+      ADMIN_GITHUB_LOGIN: ${ADMIN_GITHUB_LOGIN:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      SEED_DEMO: ${SEED_DEMO:-true}
+      APP_VERSION: ${APP_VERSION:-dev}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8081/}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}   # đặt IP/CIDR của nginx nếu muốn rate limit theo IP thật của client
+    volumes:
+      - papers-data:/data   # SQLite + PDF sống qua restart
+
+  web:
+    build: ./app/web
+    ports:
+      - "8081:8080"   # giao diện; nginx proxy /api/ sang service api
+    depends_on:
+      - api
+
+volumes:
+  papers-data:

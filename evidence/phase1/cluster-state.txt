@@ -1,0 +1,20 @@
+NAME         STATUS   ROLES           AGE     VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION               CONTAINER-RUNTIME
+k8s-master   Ready    control-plane   7d20h   v1.36.5   192.168.56.10   <none>        Ubuntu 22.04.5 LTS   5.15.0-160-generic (amd64)   containerd://2.4.1
+k8s-worker   Ready    <none>          7d18h   v1.36.5   192.168.56.11   <none>        Ubuntu 22.04.5 LTS   5.15.0-160-generic (amd64)   containerd://2.4.1
+
+NAMESPACE     NAME                                       READY   STATUS    RESTARTS         AGE     IP               NODE         NOMINATED NODE   READINESS GATES
+kube-system   calico-kube-controllers-7848b846c6-9n8t7   1/1     Running   1 (34m ago)      7d20h   10.244.235.198   k8s-master   <none>           <none>
+kube-system   calico-node-78sbg                          1/1     Running   1 (33m ago)      7d18h   192.168.56.11    k8s-worker   <none>           <none>
+kube-system   calico-node-sbbqx                          1/1     Running   1 (34m ago)      7d20h   192.168.56.10    k8s-master   <none>           <none>
+kube-system   coredns-589f44dc88-cfqcd                   1/1     Running   1 (34m ago)      7d20h   10.244.235.196   k8s-master   <none>           <none>
+kube-system   coredns-589f44dc88-lkd7c                   1/1     Running   1 (34m ago)      7d20h   10.244.235.197   k8s-master   <none>           <none>
+kube-system   etcd-k8s-master                            1/1     Running   1 (34m ago)      7d20h   192.168.56.10    k8s-master   <none>           <none>
+kube-system   kube-apiserver-k8s-master                  1/1     Running   1 (34m ago)      7d20h   192.168.56.10    k8s-master   <none>           <none>
+kube-system   kube-controller-manager-k8s-master         1/1     Running   12 (4m12s ago)   7d20h   192.168.56.10    k8s-master   <none>           <none>
+kube-system   kube-proxy-864v6                           1/1     Running   1 (34m ago)      7d20h   192.168.56.10    k8s-master   <none>           <none>
+kube-system   kube-proxy-zcr79                           1/1     Running   1 (33m ago)      7d18h   192.168.56.11    k8s-worker   <none>           <none>
+kube-system   kube-scheduler-k8s-master                  1/1     Running   13 (4m9s ago)    7d20h   192.168.56.10    k8s-master   <none>           <none>
+
+Client Version: v1.36.5
+Kustomize Version: v5.8.1
+Server Version: v1.36.5

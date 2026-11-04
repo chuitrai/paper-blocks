@@ -1,0 +1,18 @@
+.vagrant/
+node_modules/
+dist/
+build/
+*.log
+*.exe
+.env
+.env.*
+!*.env.example
+join-command.sh
+admin.conf
+app/api/data/
+*.db
+*.db-wal
+*.db-shm
+# config/ là một repo git RIÊNG (paper-blocks-config), không nằm trong app repo
+config/
+.matrix-test.*

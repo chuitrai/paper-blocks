@@ -1,0 +1,20 @@
+{{- if .Values.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paper-blocks-data
+  labels: {{- include "pb.labels" . | nindent 4 }}
+  annotations:
+    # Dữ liệu người dùng (SQLite + PDF) nằm ở đây, và StorageClass local-path có reclaimPolicy Delete:
+    # mất PVC là mất dữ liệu vĩnh viễn. Ba lớp chống xoá nhầm:
+    "helm.sh/resource-policy": keep                        # helm uninstall không xoá
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false   # ArgoCD không prune, không xoá khi xoá Application
+spec:
+  accessModes: [ReadWriteOnce]
+  {{- if .Values.persistence.storageClass }}
+  storageClassName: {{ .Values.persistence.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}
+{{- end }}

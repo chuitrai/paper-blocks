@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- CSP cũng được nginx gửi dưới dạng header; thẻ meta giữ cho chế độ dev (WEB_DIR). -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src 'self' data: https://avatars.githubusercontent.com; frame-src 'self'; object-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'">
+  <title>Paper Blocks — portfolio khối hộp</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="bar">
+    <h1>PAPER <span>BLOCKS</span></h1>
+    <span id="version" class="chip" hidden></span>
+    <span class="spacer"></span>
+    <button id="btn-new" class="btn" hidden>+ Paper mới</button>
+    <span id="who" class="who" hidden>
+      <img id="who-avatar" alt="" width="20" height="20">
+      <b id="who-name"></b>
+      <small id="who-role"></small>
+    </span>
+    <a id="btn-login" class="btn primary" href="/api/v1/auth/github/login" hidden>Đăng nhập GitHub</a>
+    <button id="btn-logout" class="btn" hidden>Thoát</button>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="world" aria-label="Thế giới 3D góc nhìn thứ nhất: WASD để đi, chuột để nhìn, E để mở paper"></canvas>
+      <div id="crosshair" aria-hidden="true"></div>
+      <div id="prompt" class="prompt" hidden></div>
+      <button id="overlay" class="overlay" type="button">Click để vào thế giới<small>WASD đi · chuột nhìn · Space nhảy · Shift chạy · E mở paper · Esc thoát chuột</small></button>
+      <p class="hint">Nhìn vào biển tên trên cửa toà nhà rồi bấm E (hoặc click) để mở paper. Danh sách bên dưới dùng được nếu không muốn đi bộ.</p>
+    </section>
+
+    <section class="toolbar">
+      <input id="q" type="search" maxlength="100" placeholder="Tìm paper theo tiêu đề hoặc tóm tắt" aria-label="Tìm paper">
+      <p id="stats" class="muted stats" aria-live="polite"></p>
+    </section>
+    <div id="tags" class="tag-filter" aria-label="Lọc theo tag"></div>
+    <ol id="list" class="list" aria-label="Danh sách paper"></ol>
+  </main>
+
+  <!-- Trang chi tiết paper -->
+  <div id="modal" class="modal" hidden>
+    <article class="sheet" role="dialog" aria-modal="true" aria-labelledby="p-title">
+      <header class="sheet-head">
+        <div>
+          <h2 id="p-title"></h2>
+          <div id="p-tags" class="tags"></div>
+        </div>
+        <button id="p-close" class="btn" aria-label="Đóng">✕</button>
+      </header>
+      <p id="p-abstract" class="abstract"></p>
+      <nav id="p-links" class="links"></nav>
+
+      <div class="tabs" role="tablist">
+        <button class="tab on" data-tab="pdf" role="tab">Paper</button>
+        <button class="tab" data-tab="readme" role="tab">README</button>
+        <button class="tab" data-tab="comments" role="tab">Bình luận <i id="c-count"></i></button>
+      </div>
+
+      <section id="tab-pdf" class="pane"></section>
+      <section id="tab-readme" class="pane" hidden></section>
+      <section id="tab-comments" class="pane" hidden>
+        <ul id="c-list" class="comments"></ul>
+        <form id="c-form" class="c-form" hidden>
+          <p id="c-replying" class="replying" hidden><span id="c-replying-to"></span> <button id="c-replying-x" class="btn" type="button" aria-label="Huỷ trả lời">✕</button></p>
+          <textarea id="c-body" maxlength="1000" rows="3" placeholder="Viết bình luận (tối đa 1000 ký tự)"></textarea>
+          <button class="btn primary" type="submit">Gửi</button>
+        </form>
+        <p id="c-login" class="muted" hidden>Đăng nhập GitHub để bình luận.</p>
+      </section>
+
+      <footer id="p-admin" class="admin" hidden>
+        <label class="btn">Tải PDF lên<input id="p-file" type="file" accept="application/pdf" hidden></label>
+        <button id="p-delete" class="btn danger">Xoá paper</button>
+      </footer>
+    </article>
+  </div>
+
+  <!-- Form tạo paper (admin) -->
+  <div id="modal-new" class="modal" hidden>
+    <form id="new-form" class="sheet narrow">
+      <header class="sheet-head"><h2>Paper mới</h2><button type="button" id="n-close" class="btn" aria-label="Đóng">✕</button></header>
+      <label>Tiêu đề<input name="title" required maxlength="200"></label>
+      <label>Tóm tắt<textarea name="abstract" rows="4" maxlength="4000"></textarea></label>
+      <label>Tag (cách nhau bằng dấu phẩy)<input name="tags"></label>
+      <label>Repo GitHub<input name="repo_url" placeholder="https://github.com/owner/repo"></label>
+      <label>Video (https)<input name="video_url" placeholder="https://..."></label>
+      <label>Demo (https)<input name="demo_url" placeholder="https://..."></label>
+      <p id="n-error" class="error" hidden></p>
+      <button class="btn primary" type="submit">Tạo</button>
+    </form>
+  </div>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

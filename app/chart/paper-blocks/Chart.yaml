@@ -1,0 +1,6 @@
+apiVersion: v2
+name: paper-blocks
+description: Portfolio paper dạng thế giới khối hộp (api Go + web nginx), lưu SQLite trên PVC
+type: application
+version: 0.1.0      # phiên bản của CHART (đổi khi sửa template)
+appVersion: "0.1.0" # phiên bản ứng dụng mặc định; thực tế do tag image trong values quyết định

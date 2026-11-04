@@ -1,0 +1,6 @@
+# Bắt buộc LF cho mọi file chạy trong VM Linux. Trên Windows, git autocrlf=true
+# sẽ biến script thành CRLF và gây lỗi "bash\r: No such file or directory".
+*.sh        text eol=lf
+Vagrantfile text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf

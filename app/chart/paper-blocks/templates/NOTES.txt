@@ -1,0 +1,11 @@
+Paper Blocks {{ .Values.api.image.tag }} đã được cài vào namespace {{ .Release.Namespace }}.
+
+{{- if eq .Values.web.service.type "NodePort" }}
+
+Mở giao diện: http://<IP-worker>:{{ .Values.web.service.nodePort }}   (ví dụ http://192.168.56.11:{{ .Values.web.service.nodePort }})
+Lưu ý: externalTrafficPolicy={{ .Values.web.service.externalTrafficPolicy }}, hãy dùng IP của node đang chạy pod web (worker).
+{{- end }}
+
+Kiểm tra:
+  kubectl -n {{ .Release.Namespace }} get pods,svc,pvc
+  kubectl -n {{ .Release.Namespace }} logs deploy/api --tail=20

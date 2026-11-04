@@ -1,0 +1,16 @@
+1. Node Ready
+NAME         STATUS   ROLES           AGE     VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION               CONTAINER-RUNTIME
+k8s-master   Ready    control-plane   7d20h   v1.36.5   192.168.56.10   <none>        Ubuntu 22.04.5 LTS   5.15.0-160-generic (amd64)   containerd://2.4.1
+k8s-worker   Ready    <none>          7d18h   v1.36.5   192.168.56.11   <none>        Ubuntu 22.04.5 LTS   5.15.0-160-generic (amd64)   containerd://2.4.1
+  [OK]   2/2 node Ready
+2. INTERNAL-IP phải thuộc 192.168.56.0/24
+  [OK]   IP đúng dải
+3. Pod hệ thống
+  [OK]   mọi pod Running
+4. Smoke test mạng (DaemonSet = 1 pod mỗi node, kể cả master)
+  [OK]   DaemonSet chạy trên cả 2 node
+  [OK]   pod->pod chéo node (10.244.254.131 -> 10.244.235.201)
+  [OK]   pod->pod chiều ngược lại
+  [OK]   DNS + Service ClusterIP
+
+PHASE 1: ĐẠT
