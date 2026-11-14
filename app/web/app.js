@@ -1,4 +1,5 @@
-// Điều phối giao diện. Quy tắc an toàn: nội dung do người dùng nhập (tiêu đề, tóm tắt, README, comment)
+// Điều phối giao diện Portfolio Học thuật & Kỹ thuật trên nền 3D Voxel Vintage.
+// Quy tắc an toàn: nội dung do người dùng nhập (tiêu đề, tóm tắt, README, comment)
 // chỉ được đưa vào trang bằng textContent / createTextNode, KHÔNG BAO GIỜ bằng innerHTML.
 import { api, ApiError, session, consumeLoginFragment } from "./api.js";
 import { createWorld } from "./world.js";
@@ -20,6 +21,7 @@ function h(tag, props = {}, ...kids) {
 let toastTimer = 0;
 function toast(msg, isErr = false) {
   const t = $("toast");
+  if (!t) return;
   t.textContent = msg;
   t.className = "toast" + (isErr ? " err" : "");
   t.hidden = false;
@@ -29,20 +31,18 @@ function toast(msg, isErr = false) {
 
 function explain(e) {
   if (!(e instanceof ApiError)) return "Không kết nối được máy chủ";
-  // Barem: thiếu quyền / token sai / hết hạn đều là 403; vượt hạn mức là 409.
   if (e.status === 403) return e.reason === "expired" ? "Phiên đã hết hạn, hãy đăng nhập lại" : "Bạn không có quyền thực hiện thao tác này";
   if (e.status === 409 && e.reason === undefined && /rate|limit|many/i.test(e.message)) return "Bạn thao tác quá nhanh, thử lại sau một phút";
   return e.message || "Có lỗi xảy ra";
 }
 
-// ----- trạng thái -----
 const state = {
-  all: [], // toàn bộ paper (cấp dữ liệu cho thế giới 3D)
+  all: [],
   me: null,
   methods: { github: false, password: false },
   current: null,
   filter: { q: "", tag: "" },
-  replyTo: null, // comment gốc đang được trả lời
+  replyTo: null,
 };
 
 // ----- URL ngoài: chỉ cho https, hiển thị tên miền, mở tab mới không rò referrer -----
@@ -58,7 +58,6 @@ function safeLink(label, raw) {
 }
 
 function avatarSrc(url) {
-  // Chỉ nhận ảnh đại diện từ GitHub; CSP cũng chặn các nguồn khác.
   return typeof url === "string" && url.startsWith("https://avatars.githubusercontent.com/") ? url : "";
 }
 
@@ -95,7 +94,7 @@ async function loadMe() {
   renderAuth();
 }
 
-// ----- danh sách + thế giới -----
+// ----- danh sách công bố khoa học + thế giới -----
 let world;
 async function loadPapers() {
   const data = await api("/papers");
@@ -106,7 +105,6 @@ async function loadPapers() {
   loadStats();
 }
 
-// Danh sách bên dưới dùng tìm kiếm/lọc phía server (?q=, ?tag=); không lọc thì dùng lại dữ liệu đã tải.
 async function renderList() {
   const f = state.filter;
   let papers = state.all;
@@ -125,13 +123,35 @@ async function renderList() {
   list.replaceChildren();
   if (papers.length === 0) {
     const filtered = f.q || f.tag;
-    list.append(h("li", { class: "empty", text: filtered ? "Không có paper nào khớp." : "Chưa có paper nào." + (state.me?.role === "admin" ? " Bấm “+ Paper mới” để tạo." : "") }));
+    list.append(
+      h("li", {
+        class: "empty",
+        text: filtered ? "Không có công bố nào khớp từ khoá." : "Chưa có công bố nào." + (state.me?.role === "admin" ? " Bấm “+ Thêm Paper” để tạo." : ""),
+      })
+    );
     return;
   }
-  for (const p of papers) {
+  for (const [idx, p] of papers.entries()) {
+    const thumb = h(
+      "div",
+      { class: "pub-thumb", "aria-hidden": "true" },
+      h("span", { class: "pub-thumb-type", text: p.has_pdf ? "PDF PAPER" : "RESEARCH" }),
+      h("span", { class: "pub-thumb-icon", text: `Paper #${idx + 1}` })
+    );
     const tags = h("div", { class: "tags" }, ...(p.tags || []).map((t) => h("span", { text: t })));
-    const meta = h("small", { class: "meta", text: `${p.views} lượt xem · ${p.comment_count} bình luận` });
-    const card = h("button", { class: "card", type: "button", onclick: () => openPaper(p.id) }, h("h3", { text: p.title }), h("p", { text: p.abstract || "" }), tags, meta);
+    const meta = h("small", {
+      class: "meta",
+      text: `[Xem toàn văn & Thảo luận] · ${p.views} lượt đọc · ${p.comment_count} bình luận`,
+    });
+    const mainCol = h(
+      "div",
+      { class: "pub-main" },
+      h("h3", { text: p.title }),
+      h("p", { text: p.abstract || "" }),
+      tags,
+      meta
+    );
+    const card = h("button", { class: "card", type: "button", onclick: () => openPaper(p.id) }, thumb, mainCol);
     list.append(h("li", {}, card));
   }
 }
@@ -142,22 +162,25 @@ async function loadTags() {
     const box = $("tags");
     box.replaceChildren();
     for (const t of tags) {
-      const b = h("button", { type: "button", class: state.filter.tag === t.tag ? "on" : "", text: `${t.tag} (${t.count})`, onclick: () => {
-        state.filter.tag = state.filter.tag === t.tag ? "" : t.tag; // bấm lần nữa để bỏ lọc
-        loadTags();
-        renderList();
-      } });
+      const b = h("button", {
+        type: "button",
+        class: state.filter.tag === t.tag ? "on" : "",
+        text: `${t.tag} (${t.count})`,
+        onclick: () => {
+          state.filter.tag = state.filter.tag === t.tag ? "" : t.tag;
+          loadTags();
+          renderList();
+        },
+      });
       box.append(b);
     }
-  } catch {
-    /* tag chỉ là tiện ích: lỗi thì bỏ qua */
-  }
+  } catch {}
 }
 
 async function loadStats() {
   try {
     const s = await api("/stats");
-    $("stats").textContent = `${s.papers} paper · ${s.comments} bình luận · ${s.views} lượt xem`;
+    $("stats").textContent = `${s.papers} công bố · ${s.comments} thảo luận · ${s.views} lượt đọc`;
   } catch {
     $("stats").textContent = "";
   }
@@ -165,7 +188,7 @@ async function loadStats() {
 
 let searchTimer = 0;
 $("q").addEventListener("input", (e) => {
-  clearTimeout(searchTimer); // chờ người dùng gõ xong để không bắn một request cho mỗi phím
+  clearTimeout(searchTimer);
   searchTimer = setTimeout(() => {
     state.filter.q = e.target.value.trim();
     renderList();
@@ -193,7 +216,7 @@ async function openPaper(id) {
   }
   state.current = p;
   state.replyTo = null;
-  // Ghi một lượt xem. Lỗi (kể cả 409 do rate limit) đều bỏ qua: đây không phải việc người dùng cần biết.
+
   api(`/papers/${p.id}/view`, { method: "POST" }).catch(() => {});
   world.setPaused(true);
   $("p-title").textContent = p.title;
@@ -209,7 +232,6 @@ async function openPaper(id) {
   const pdf = $("tab-pdf");
   pdf.replaceChildren();
   if (p.has_pdf) {
-    // Không dùng sandbox: trình xem PDF của Chrome không chạy trong iframe sandbox.
     pdf.append(h("iframe", { src: `/api/v1/papers/${p.id}/file`, title: "PDF: " + p.title }));
   } else {
     pdf.append(h("p", { class: "muted", text: "Paper này chưa có file PDF." }));
@@ -226,7 +248,7 @@ async function openPaper(id) {
 
 function closePaper() {
   $("modal").hidden = true;
-  $("tab-pdf").replaceChildren(); // gỡ iframe để dừng trình xem PDF
+  $("tab-pdf").replaceChildren();
   state.current = null;
   clearReply();
   world.setPaused(false);
@@ -260,12 +282,11 @@ async function loadComments() {
   if (!p) return;
   try {
     const { comments } = await api(`/papers/${p.id}/comments`);
-    if (state.current?.id !== p.id) return; // người dùng đã đóng hoặc mở paper khác
+    if (state.current?.id !== p.id) return;
     $("c-count").textContent = comments.length ? `(${comments.length})` : "";
     const ul = $("c-list");
     ul.replaceChildren();
     if (!comments.length) ul.append(h("li", { class: "muted", text: "Chưa có bình luận." }));
-    // Một cấp trả lời: mỗi comment gốc kèm các reply của nó, theo thứ tự thời gian.
     const roots = comments.filter((c) => !c.parent_id);
     for (const root of roots) {
       ul.append(commentRow(root, false));
@@ -286,8 +307,8 @@ function commentRow(c, isReply) {
   const main = h("div", {}, head, bodyEl);
 
   const actions = h("div", { class: "actions" });
-  if (state.me && !isReply) actions.append(h("button", { class: "btn", type: "button", text: "Trả lời", onclick: () => setReply(c) }));
-  if (mine) actions.append(h("button", { class: "btn", type: "button", text: "Sửa", onclick: () => startEdit(c, main, bodyEl, actions) }));
+  if (state.me && !isReply) actions.append(h("button", { class: "btn-ghost", type: "button", text: "Trả lời", onclick: () => setReply(c) }));
+  if (mine) actions.append(h("button", { class: "btn-ghost", type: "button", text: "Sửa", onclick: () => startEdit(c, main, bodyEl, actions) }));
   if (canDelete) actions.append(h("button", { class: "btn danger", type: "button", text: "Xoá", onclick: () => removeComment(c.id) }));
   return h("li", { class: isReply ? "reply" : "" }, src ? h("img", { src, alt: "" }) : h("span"), main, actions);
 }
@@ -304,12 +325,11 @@ function clearReply() {
 }
 $("c-replying-x").addEventListener("click", clearReply);
 
-// Sửa tại chỗ: thay đoạn văn bằng ô nhập; nội dung vẫn được đặt bằng .value (không phải HTML).
 function startEdit(c, main, bodyEl, actions) {
   const ta = h("textarea", { maxlength: "1000", rows: "3" });
   ta.value = c.body;
   const save = h("button", { class: "btn primary", type: "button", text: "Lưu" });
-  const cancel = h("button", { class: "btn", type: "button", text: "Huỷ", onclick: loadComments });
+  const cancel = h("button", { class: "btn-ghost", type: "button", text: "Huỷ", onclick: loadComments });
   save.addEventListener("click", async () => {
     const body = ta.value.trim();
     if (!body) return;
@@ -337,13 +357,14 @@ async function removeComment(id) {
   }
 }
 
-// ----- sự kiện -----
+// ----- sự kiện Modal & Form -----
 $("p-close").addEventListener("click", closePaper);
 $("modal").addEventListener("click", (e) => e.target === $("modal") && closePaper());
 document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
   if (!$("modal-new").hidden) $("modal-new").hidden = true;
   else if (!$("modal").hidden) closePaper();
+  else if (document.body.classList.contains("scenic-mode")) toggleScenicMode(false);
 });
 document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => showTab(b.dataset.tab)));
 
@@ -358,7 +379,7 @@ $("c-form").addEventListener("submit", async (e) => {
     $("c-body").value = "";
     clearReply();
     loadComments();
-    loadPapers(); // cập nhật số bình luận và thống kê
+    loadPapers();
   } catch (err) {
     toast(err instanceof ApiError && err.status === 409 ? "Bạn bình luận quá nhanh, đợi một phút rồi thử lại" : explain(err), true);
   }
@@ -434,15 +455,84 @@ window.addEventListener("session-changed", async () => {
   toast("Phiên đã hết hạn, hãy đăng nhập lại", true);
 });
 
+// Nút đổi bầu trời 3D Ngày / Hoàng hôn / Đêm
+$("btn-time")?.addEventListener("click", () => {
+  if (!world?.cycleTimeMode) return;
+  const mode = world.cycleTimeMode();
+  const labels = ["🌤️ Bầu trời: Ngày", "🌇 Bầu trời: Chiều", "🌙 Bầu trời: Đêm"];
+  $("btn-time").textContent = labels[mode] || "🌤️ Bầu trời";
+});
+
+// Nút Ngắm cảnh nền 3D
+function toggleScenicMode(force) {
+  const isScenic = typeof force === "boolean" ? force : !document.body.classList.contains("scenic-mode");
+  document.body.classList.toggle("scenic-mode", isScenic);
+  const btn = $("btn-scenic");
+  if (btn) {
+    btn.textContent = isScenic ? "📋 Hiện Portfolio" : "🖼️ Ngắm nền 3D";
+  }
+  if (isScenic) {
+    toast("Đang ẩn tạm bảng thông tin để ngắm dòng sông 3D (Bấm Esc hoặc nút trên thanh menu để hiện lại)");
+  }
+}
+
+$("btn-scenic")?.addEventListener("click", () => toggleScenicMode());
+
+// Bộ lọc tab khu vực Hoạt động / Sự kiện / Vlog
+document.querySelectorAll(".f-pill").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const filter = btn.dataset.media;
+    document.querySelectorAll(".f-pill").forEach((b) => b.classList.toggle("on", b === btn));
+    document.querySelectorAll("#activities [data-category]").forEach((card) => {
+      card.hidden = filter !== "all" && card.dataset.category !== filter;
+    });
+  });
+});
+
+// Hiệu ứng xuất hiện khi cuộn
+function setupScrollAnimations() {
+  const sections = document.querySelectorAll(".frosted-section");
+  const navLinks = document.querySelectorAll(".nav-links a");
+
+  if ("IntersectionObserver" in window) {
+    const revealObs = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        }
+      },
+      { threshold: 0.06 }
+    );
+    sections.forEach((s) => revealObs.observe(s));
+
+    const spyObs = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const id = "#" + entry.target.id;
+            navLinks.forEach((a) => a.classList.toggle("active", a.getAttribute("href") === id));
+          }
+        }
+      },
+      { rootMargin: "-25% 0px -55% 0px" }
+    );
+    sections.forEach((s) => spyObs.observe(s));
+  } else {
+    sections.forEach((s) => s.classList.add("visible"));
+  }
+}
+
 // ----- khởi động -----
 async function boot() {
+  setupScrollAnimations();
+
   try {
-    world = createWorld($("world"), { onEnter: (p) => openPaper(p.id) });
+    world = createWorld($("world"));
   } catch (e) {
-    // Không có WebGL: vẫn dùng được danh sách paper bên dưới.
     console.error(e);
-    world = { setPapers() {}, setPaused() {} };
-    $("overlay").textContent = "Trình duyệt không hỗ trợ WebGL, hãy dùng danh sách bên dưới.";
+    world = { setPapers() {}, setPaused() {}, cycleTimeMode() { return 0; } };
   }
 
   const login = consumeLoginFragment();
@@ -456,7 +546,6 @@ async function boot() {
   await loadMe();
   if (login?.loggedIn && state.me) toast("Xin chào " + shortName(state.me.user));
 
-  // Chỉ gọi /status MỘT lần: endpoint này bị giới hạn 10 request/phút theo yêu cầu barem.
   api("/status")
     .then((s) => {
       $("version").textContent = "v" + s.version;

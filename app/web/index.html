@@ -5,43 +5,438 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- CSP cũng được nginx gửi dưới dạng header; thẻ meta giữ cho chế độ dev (WEB_DIR). -->
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; img-src 'self' data: https://avatars.githubusercontent.com; frame-src 'self'; object-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'">
-  <title>Paper Blocks — portfolio khối hộp</title>
+        content="default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://avatars.githubusercontent.com; frame-src 'self'; object-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'">
+  <title>Academic &amp; Engineering Portfolio — Cloud, AI &amp; Systems Research</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Cảnh nền 3D Voxel phong cách Vintage (Dòng sông chảy, nhà cổ có bánh xe nước, cầu đá rêu phong, Steve câu cá) -->
+  <div class="world-bg" aria-hidden="true">
+    <canvas id="world" tabindex="-1" aria-label="Cảnh nền 3D Vintage dòng sông chảy và kiến trúc cổ điển"></canvas>
+    <div class="world-veil"></div>
+  </div>
+
+  <!-- Thanh điều hướng phong cách Học thuật / Khoa học (Nền trắng mờ) -->
   <header class="bar">
-    <h1>PAPER <span>BLOCKS</span></h1>
-    <span id="version" class="chip" hidden></span>
-    <span class="spacer"></span>
-    <button id="btn-new" class="btn" hidden>+ Paper mới</button>
-    <span id="who" class="who" hidden>
-      <img id="who-avatar" alt="" width="20" height="20">
-      <b id="who-name"></b>
-      <small id="who-role"></small>
-    </span>
-    <a id="btn-login" class="btn primary" href="/api/v1/auth/github/login" hidden>Đăng nhập GitHub</a>
-    <button id="btn-logout" class="btn" hidden>Thoát</button>
+    <div class="bar-inner">
+      <a href="#about" class="brand">
+        <h1>Portfolio <span>· Research &amp; Engineering</span></h1>
+      </a>
+      <span id="version" class="chip" hidden></span>
+
+      <nav class="nav-links" aria-label="Điều hướng các mục">
+        <a href="#about">Giới thiệu</a>
+        <a href="#news">Tin mới</a>
+        <a href="#papers">Công bố (Papers)</a>
+        <a href="#projects">Dự án</a>
+        <a href="#activities">Hoạt động &amp; Vlog</a>
+        <a href="#experience">Kinh nghiệm &amp; CV</a>
+      </nav>
+
+      <span class="spacer"></span>
+
+      <button id="btn-time" class="btn-ghost" type="button" title="Đổi thời gian cảnh nền 3D (Ngày / Hoàng hôn / Đêm)">🌤️ Bầu trời</button>
+      <button id="btn-scenic" class="btn-ghost" type="button" title="Ẩn tạm nội dung để ngắm cảnh dòng sông 3D">🖼️ Ngắm nền 3D</button>
+      <button id="btn-new" class="btn primary" type="button" hidden>+ Thêm Paper</button>
+
+      <span id="who" class="who" hidden>
+        <img id="who-avatar" alt="" width="22" height="22">
+        <b id="who-name"></b>
+        <small id="who-role"></small>
+      </span>
+      <a id="btn-login" class="btn primary" href="/api/v1/auth/github/login" hidden>Đăng nhập GitHub</a>
+      <button id="btn-logout" class="btn-ghost" type="button" hidden>Thoát</button>
+    </div>
   </header>
 
-  <main>
-    <section class="stage">
-      <canvas id="world" aria-label="Thế giới 3D góc nhìn thứ nhất: WASD để đi, chuột để nhìn, E để mở paper"></canvas>
-      <div id="crosshair" aria-hidden="true"></div>
-      <div id="prompt" class="prompt" hidden></div>
-      <button id="overlay" class="overlay" type="button">Click để vào thế giới<small>WASD đi · chuột nhìn · Space nhảy · Shift chạy · E mở paper · Esc thoát chuột</small></button>
-      <p class="hint">Nhìn vào biển tên trên cửa toà nhà rồi bấm E (hoặc click) để mở paper. Danh sách bên dưới dùng được nếu không muốn đi bộ.</p>
+  <!-- Khung nội dung chính theo bố cục chuẩn Học thuật / Khoa học (giống leevtruong.com) -->
+  <main id="portfolio-main" class="academic-container">
+
+    <!-- =================================================================== -->
+    <!-- 1. HỒ SƠ & TIỂU SỬ KHOA HỌC (BIOGRAPHY & PROFILE HEADER)           -->
+    <!-- =================================================================== -->
+    <section id="about" class="frosted-section reveal">
+      <div class="bio-layout">
+        <!-- Cột trái: Ảnh chân dung, Chức danh & Liên kết Học thuật -->
+        <aside class="bio-sidebar">
+          <div class="portrait-frame">
+            <svg class="portrait-svg" viewBox="0 0 240 260" role="img" aria-label="Ảnh chân dung">
+              <defs>
+                <linearGradient id="vintBg" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#e6dfd3"/>
+                  <stop offset="100%" stop-color="#c8d6d9"/>
+                </linearGradient>
+              </defs>
+              <rect width="240" height="260" fill="url(#vintBg)"/>
+              <circle cx="120" cy="115" r="88" fill="#ffffff" opacity="0.55"/>
+              <!-- Minh hoạ chân dung lịch sự, học thuật -->
+              <path d="M52 260 C52 195 188 195 188 260 Z" fill="#2d4a53"/>
+              <path d="M98 188 L120 225 L142 188 Z" fill="#f7f4ef"/>
+              <rect x="108" y="160" width="24" height="34" fill="#e2b496"/>
+              <rect x="82" y="72" width="76" height="92" rx="36" fill="#ebbda0"/>
+              <path d="M78 102 C78 56 162 56 162 102 C152 82 90 82 78 102 Z" fill="#3b2d26"/>
+              <!-- Kính gọng mảnh tri thức -->
+              <rect x="92" y="106" width="24" height="15" rx="3" fill="none" stroke="#334155" stroke-width="2.2"/>
+              <rect x="124" y="106" width="24" height="15" rx="3" fill="none" stroke="#334155" stroke-width="2.2"/>
+              <line x1="116" y1="113" x2="124" y2="113" stroke="#334155" stroke-width="2.2"/>
+              <path d="M108 140 Q120 148 132 140" fill="none" stroke="#8c5842" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+
+          <h2 class="scholar-name">Cloud &amp; AI Researcher</h2>
+          <p class="scholar-title">Kỹ sư Cloud-Native / DevSecOps &amp; Nghiên cứu viên</p>
+          <p class="scholar-affil">🏛 Viettel Digital Talent · Hà Nội, Việt Nam</p>
+
+          <div class="scholar-links">
+            <a href="#papers" class="s-link">📄 Google Scholar / Papers</a>
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="s-link">💻 GitHub</a>
+            <a href="#activities" class="s-link">🎬 TikTok / Vlog</a>
+            <a href="#experience" class="s-link">📋 Curriculum Vitae (CV)</a>
+          </div>
+        </aside>
+
+        <!-- Cột phải: Giới thiệu bản thân, Hướng nghiên cứu & Học vấn tóm tắt -->
+        <div class="bio-content">
+          <h2 class="section-heading">Giới thiệu (Biography)</h2>
+          <p>
+            Xin chào! Mình là kỹ sư và nhà nghiên cứu trẻ hoạt động trong lĩnh vực <b>Hạ tầng Đám mây (Cloud-Native &amp; Kubernetes)</b>, <b>Tự động hoá DevSecOps</b> và <b>Hệ thống Trí tuệ Nhân tạo Phân tán (Distributed AI Systems)</b>. Hiện tại, mình đang tham gia chương trình <b>Viettel Digital Talent (Cloud &amp; DevOps Track)</b>, nơi mình nghiên cứu và phát triển các kiến trúc đường ống triển khai phần mềm tốc độ cao, an toàn và có khả năng tự phục hồi.
+          </p>
+          <p>
+            Bên cạnh công việc nghiên cứu khoa học và thiết kế hệ thống, mình là một người năng động, hướng ngoại và yêu thích chia sẻ kiến thức qua các buổi <b>Seminar học thuật, Hackathon công nghệ, chuỗi Vlog hậu trường kỹ thuật và kênh TikTok chia sẻ kiến thức</b>.
+          </p>
+
+          <div class="bio-two-cols">
+            <div>
+              <h3>Hướng Nghiên cứu &amp; Chuyên môn</h3>
+              <ul class="clean-list">
+                <li><b>Cloud-Native &amp; Orchestration:</b> Kubernetes, Helm, GitOps (ArgoCD), Auto-scaling.</li>
+                <li><b>DevSecOps &amp; Reliability:</b> Fast-Lane CI/CD, Container Hardening, Observability (Prometheus, EFK).</li>
+                <li><b>Distributed Systems &amp; AI:</b> Tối ưu hoá hiệu năng dịch vụ Backend (Go/Python) &amp; triển khai mô hình.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3>Học vấn &amp; Đơn vị Công tác</h3>
+              <ul class="edu-mini-list">
+                <li>
+                  <b>Viettel Digital Talent</b> (2026 — Hiện tại)
+                  <span>Cloud &amp; DevSecOps Engineer Trainee</span>
+                </li>
+                <li>
+                  <b>Đại học Chính quy — CNTT &amp; KHMT</b>
+                  <span>Kỹ sư Hệ thống Phân tán &amp; Nghiên cứu Khoa học</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <section class="toolbar">
-      <input id="q" type="search" maxlength="100" placeholder="Tìm paper theo tiêu đề hoặc tóm tắt" aria-label="Tìm paper">
-      <p id="stats" class="muted stats" aria-live="polite"></p>
+    <!-- =================================================================== -->
+    <!-- 2. TIN MỚI & CỘT MỐC NỔI BẬT (NEWS & UPDATES)                       -->
+    <!-- =================================================================== -->
+    <section id="news" class="frosted-section reveal">
+      <h2 class="section-heading">Tin mới &amp; Cập nhật (News)</h2>
+      <ul class="academic-news-list">
+        <li>
+          <span class="news-date">11 / 2026</span>
+          <div class="news-body">
+            Hoàn thành nghiên cứu thực nghiệm và triển khai kiến trúc <b>Fast-Lane CI/CD trên Kubernetes</b>, rút ngắn <b>61.5%</b> thời gian phát hành phần mềm (từ 195s xuống 75s) với 100% Pod đạt chuẩn bảo mật Non-root.
+          </div>
+        </li>
+        <li>
+          <span class="news-date">10 / 2026</span>
+          <div class="news-body">
+            Phát hành nền tảng <b>Paper Blocks Research Portfolio</b> hỗ trợ lưu trữ công bố khoa học, đọc trực tiếp PDF, đồng bộ tài liệu từ GitHub và thảo luận học thuật qua OAuth 2.0.
+          </div>
+        </li>
+        <li>
+          <span class="news-date">08 / 2026</span>
+          <div class="news-body">
+            Trúng tuyển và tham gia chương trình đào tạo tài năng <b>Viettel Digital Talent (Cloud &amp; DevOps Track)</b>.
+          </div>
+        </li>
+        <li>
+          <span class="news-date">06 / 2026</span>
+          <div class="news-body">
+            Ra mắt chuỗi <b>Vlog &amp; TikTok Khoa học - Công nghệ</b> chia sẻ về cuộc sống nghiên cứu, kinh nghiệm thi Hackathon 48h và giải thích kiến trúc hệ thống trực quan.
+          </div>
+        </li>
+      </ul>
     </section>
-    <div id="tags" class="tag-filter" aria-label="Lọc theo tag"></div>
-    <ol id="list" class="list" aria-label="Danh sách paper"></ol>
+
+    <!-- =================================================================== -->
+    <!-- 3. CÔNG BỐ KHOA HỌC & BÁO CÁO KỸ THUẬT (SELECTED PUBLICATIONS)      -->
+    <!-- =================================================================== -->
+    <section id="papers" class="frosted-section reveal">
+      <div class="section-head-row">
+        <div>
+          <h2 class="section-heading">Công bố Khoa học &amp; Báo cáo Kỹ thuật (Publications)</h2>
+          <p class="section-sub">Danh sách các bài báo, báo cáo nghiên cứu kèm toàn văn PDF, mã nguồn GitHub và thảo luận học thuật.</p>
+        </div>
+        <p id="stats" class="stats-badge" aria-live="polite"></p>
+      </div>
+
+      <div class="toolbar">
+        <input id="q" type="search" maxlength="100" placeholder="Tìm kiếm bài báo theo tiêu đề, từ khoá hoặc nội dung tóm tắt..." aria-label="Tìm paper">
+      </div>
+      <div id="tags" class="tag-filter" aria-label="Lọc theo từ khoá"></div>
+      <ol id="list" class="pub-list" aria-label="Danh sách công bố khoa học"></ol>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- 4. DỰ ÁN NGHIÊN CỨU & KỸ THUẬT (FEATURED PROJECTS)                  -->
+    <!-- =================================================================== -->
+    <section id="projects" class="frosted-section reveal">
+      <h2 class="section-heading">Dự án Nghiên cứu &amp; Kỹ thuật (Featured Projects)</h2>
+      <p class="section-sub">Các hệ thống phần mềm và hạ tầng đám mây được thiết kế, đo kiểm và vận hành thực tế.</p>
+
+      <div class="academic-item-list">
+        <!-- Project 1 -->
+        <article class="academic-row">
+          <div class="row-thumb">
+            <svg viewBox="0 0 220 140" role="img" aria-label="Kiến trúc Kubernetes & GitOps">
+              <rect width="220" height="140" rx="8" fill="#eef2f6"/>
+              <rect x="14" y="16" width="192" height="108" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
+              <rect x="26" y="32" width="52" height="32" rx="4" fill="#dceefb" stroke="#3b82f6"/>
+              <text x="35" y="52" fill="#1e3a8a" font-family="sans-serif" font-weight="bold" font-size="10">CI Build</text>
+              <line x1="78" y1="48" x2="96" y2="48" stroke="#64748b" stroke-width="2"/>
+              <rect x="96" y="32" width="52" height="32" rx="4" fill="#d1fae5" stroke="#10b981"/>
+              <text x="103" y="52" fill="#065f46" font-family="sans-serif" font-weight="bold" font-size="10">ArgoCD</text>
+              <line x1="148" y1="48" x2="164" y2="48" stroke="#64748b" stroke-width="2"/>
+              <rect x="164" y="32" width="32" height="32" rx="4" fill="#fef3c7" stroke="#d97706"/>
+              <text x="170" y="52" fill="#92400e" font-family="sans-serif" font-weight="bold" font-size="10">K8s</text>
+              <text x="26" y="92" fill="#334155" font-family="monospace" font-size="10">Pipeline: 195s → 75s (-61.5%)</text>
+              <text x="26" y="108" fill="#0f766e" font-family="monospace" font-size="10">Security: Non-root · Cosign</text>
+            </svg>
+          </div>
+          <div class="row-body">
+            <h3>Tối ưu hoá Đường ống Fast-Lane CI/CD &amp; Triển khai GitOps trên Kubernetes</h3>
+            <p class="row-authors"><b>Vai trò:</b> Cloud &amp; DevSecOps Architect · <b>Môi trường:</b> Kubernetes, Jenkins K8s Agent, BuildKit, ArgoCD, Helm</p>
+            <p class="row-desc">
+              Thiết kế kiến trúc build phân tán sử dụng Pod Template đa container trên Kubernetes kết hợp PVC Cache và BuildKit Registry Cache, giúp giảm 61.5% thời gian chờ pipeline. Tích hợp kiểm tra bảo mật tự động (gosec, govulncheck, Trivy), ký số ảnh bằng Cosign và triển khai Rolling Update không gián đoạn (Zero-Downtime).
+            </p>
+            <div class="tags">
+              <span>Kubernetes</span><span>Helm</span><span>ArgoCD GitOps</span><span>DevSecOps</span><span>BuildKit</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project 2 -->
+        <article class="academic-row">
+          <div class="row-thumb">
+            <svg viewBox="0 0 220 140" role="img" aria-label="Hệ thống Giám sát Prometheus & EFK">
+              <rect width="220" height="140" rx="8" fill="#f1f5f9"/>
+              <rect x="14" y="16" width="192" height="108" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
+              <polyline points="26,96 58,76 90,82 122,48 154,56 190,34" fill="none" stroke="#0f766e" stroke-width="3"/>
+              <polyline points="26,108 62,102 98,105 138,94 190,98" fill="none" stroke="#b45309" stroke-width="2"/>
+              <text x="26" y="34" fill="#1e293b" font-family="sans-serif" font-weight="bold" font-size="10">Golden Signals Telemetry</text>
+              <text x="26" y="116" fill="#64748b" font-family="monospace" font-size="9.5">Prometheus · Grafana · EFK</text>
+            </svg>
+          </div>
+          <div class="row-body">
+            <h3>Hệ thống Quan sát Tập trung (Observability Stack) &amp; Tự động Co giãn trên Cloud</h3>
+            <p class="row-authors"><b>Vai trò:</b> Site Reliability Engineer (SRE) · <b>Công nghệ:</b> Prometheus, Grafana, Fluent Bit, Elasticsearch, Kibana, HPA</p>
+            <p class="row-desc">
+              Xây dựng giải pháp thu thập và phân tích 4 tín hiệu vàng (Latency, Traffic, Errors, Saturation) theo thời gian thực; chuẩn hoá nhật ký cấu trúc JSON gắn Request-ID và thiết lập kịch bản tự động mở rộng Pod (HPA) khi lưu lượng tăng đột biến.
+            </p>
+            <div class="tags">
+              <span>Prometheus</span><span>Grafana</span><span>EFK Logging</span><span>SRE</span><span>High Availability</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project 3 -->
+        <article class="academic-row">
+          <div class="row-thumb">
+            <svg viewBox="0 0 220 140" role="img" aria-label="Nền tảng Paper Blocks Go & WebGL">
+              <rect width="220" height="140" rx="8" fill="#f3efe6"/>
+              <rect x="14" y="16" width="192" height="108" rx="6" fill="#ffffff" stroke="#d6cfc2"/>
+              <rect x="28" y="30" width="72" height="80" rx="4" fill="#e6dfd3" stroke="#8c7a6b"/>
+              <text x="40" y="72" fill="#4a3b2c" font-family="serif" font-weight="bold" font-size="11">PDF / Paper</text>
+              <rect x="112" y="30" width="80" height="80" rx="4" fill="#dce8ec" stroke="#5b828e"/>
+              <text x="122" y="66" fill="#2c4c56" font-family="sans-serif" font-weight="bold" font-size="10">Go 1.24 API</text>
+              <text x="122" y="82" fill="#2c4c56" font-family="monospace" font-size="9.5">SQLite WAL</text>
+            </svg>
+          </div>
+          <div class="row-body">
+            <h3>Paper Blocks — Nền tảng Lưu trữ Công bố Khoa học &amp; Tương tác Học thuật</h3>
+            <p class="row-authors"><b>Vai trò:</b> Full-Stack Systems Developer · <b>Công nghệ:</b> Go 1.24, SQLite WAL, OAuth 2.0 PKCE, Three.js WebGL</p>
+            <p class="row-desc">
+              Phát triển nền tảng web phục vụ trình bày công trình nghiên cứu với cơ chế kiểm tra tính toàn vẹn file PDF, tìm kiếm toàn văn, đồng bộ README trực tiếp từ GitHub, xác thực người dùng an toàn và cảnh nền Voxel 3D phong cách Vintage.
+            </p>
+            <div class="tags">
+              <span>Golang</span><span>SQLite WAL</span><span>OAuth2 PKCE</span><span>Strict CSP</span><span>WebGL</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- 5. HOẠT ĐỘNG, SỰ KIỆN, VLOG & TIKTOK (ACTIVITIES & MEDIA)           -->
+    <!-- =================================================================== -->
+    <section id="activities" class="frosted-section reveal">
+      <div class="section-head-row">
+        <div>
+          <h2 class="section-heading">Hoạt động Học thuật, Sự kiện &amp; Góc Sáng tạo (Vlog / TikTok)</h2>
+          <p class="section-sub">Lưu giữ các khoảnh khắc thuyết trình hội thảo, tham gia cuộc thi công nghệ và lan toả năng lượng qua các video ngắn, vlog đời sống nghiên cứu.</p>
+        </div>
+
+        <div class="filter-pills" role="tablist" aria-label="Lọc hoạt động">
+          <button class="f-pill on" data-media="all" type="button">Tất cả</button>
+          <button class="f-pill" data-media="event" type="button">🏛 Sự kiện &amp; Hội thảo</button>
+          <button class="f-pill" data-media="vlog" type="button">🎬 Video Vlog &amp; TikTok</button>
+        </div>
+      </div>
+
+      <!-- Lưới Hoạt động & Sự kiện (Ảnh + Thông tin rõ ràng, trang nhã) -->
+      <div class="media-showcase-grid">
+        <!-- Hoạt động 1 -->
+        <article class="media-card" data-category="event">
+          <div class="media-thumb">
+            <svg viewBox="0 0 360 200" role="img" aria-label="Viettel Digital Talent Program">
+              <rect width="360" height="200" fill="#e8e2d5"/>
+              <rect x="18" y="18" width="324" height="164" rx="8" fill="#ffffff" stroke="#d4cbb8"/>
+              <rect x="34" y="34" width="96" height="24" rx="4" fill="#991b1b"/>
+              <text x="44" y="50" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="10">VIETTEL TALENT</text>
+              <text x="34" y="88" fill="#1e293b" font-family="serif" font-weight="bold" font-size="18">Cloud &amp; DevOps Track 2026</text>
+              <text x="34" y="114" fill="#475569" font-family="sans-serif" font-size="12.5">Thực chiến thiết kế hạ tầng đám mây &amp; CI/CD</text>
+              <text x="34" y="152" fill="#0f766e" font-family="monospace" font-size="11.5">📍 Hà Nội · Chương trình Kỹ sư Tài năng</text>
+            </svg>
+            <span class="media-badge">Sự kiện Trọng điểm · 2026</span>
+          </div>
+          <div class="media-info">
+            <h3>Viettel Digital Talent — Cloud &amp; DevOps Track</h3>
+            <p>Tham gia đào tạo chuyên sâu và phát triển dự án thực tế cùng các chuyên gia hạ tầng đám mây tại Viettel; trực tiếp xây dựng và bảo mật hệ thống trên cụm Kubernetes.</p>
+          </div>
+        </article>
+
+        <!-- Hoạt động 2 -->
+        <article class="media-card" data-category="event">
+          <div class="media-thumb">
+            <svg viewBox="0 0 360 200" role="img" aria-label="Seminar Nghiên cứu Khoa học & Hackathon">
+              <rect width="360" height="200" fill="#dde7ea"/>
+              <rect x="18" y="18" width="324" height="164" rx="8" fill="#ffffff" stroke="#c2d3d8"/>
+              <rect x="34" y="34" width="110" height="24" rx="4" fill="#1e3a8a"/>
+              <text x="44" y="50" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="10">SEMINAR &amp; TALK</text>
+              <text x="34" y="88" fill="#1e293b" font-family="serif" font-weight="bold" font-size="18">Báo cáo Khoa học &amp; Hackathon</text>
+              <text x="34" y="114" fill="#475569" font-family="sans-serif" font-size="12.5">Thuyết trình kết quả nghiên cứu &amp; thi đấu 48h</text>
+              <text x="34" y="152" fill="#1e3a8a" font-family="monospace" font-size="11.5">🎙️ Diễn giả &amp; Trưởng nhóm Kỹ thuật</text>
+            </svg>
+            <span class="media-badge">Hội thảo &amp; Cuộc thi · 2025–2026</span>
+          </div>
+          <div class="media-info">
+            <h3>Thuyết trình Seminar Khoa học &amp; Cloud/AI Hackathon</h3>
+            <p>Trình bày báo cáo nghiên cứu tại các buổi seminar học thuật và cùng đội nhóm xây dựng nguyên mẫu hệ thống chịu tải cao trong 48 giờ thi đấu Hackathon.</p>
+          </div>
+        </article>
+
+        <!-- Vlog / TikTok 1 -->
+        <article class="media-card" data-category="vlog">
+          <div class="media-thumb">
+            <svg viewBox="0 0 360 200" role="img" aria-label="Vlog Một ngày làm Nghiên cứu & DevOps">
+              <rect width="360" height="200" fill="#e5ece6"/>
+              <rect x="18" y="18" width="324" height="164" rx="8" fill="#ffffff" stroke="#c5d6c8"/>
+              <circle cx="300" cy="100" r="26" fill="#2f5e4e"/>
+              <polygon points="294,88 294,112 314,100" fill="#ffffff"/>
+              <rect x="34" y="34" width="96" height="24" rx="4" fill="#2f5e4e"/>
+              <text x="44" y="50" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="10">🎬 VLOG SERIES</text>
+              <text x="34" y="88" fill="#1e293b" font-family="serif" font-weight="bold" font-size="17.5">Một ngày làm Cloud &amp; Research</text>
+              <text x="34" y="114" fill="#475569" font-family="sans-serif" font-size="12.5">Hậu trường đọc paper, tối ưu cụm K8s &amp; đời sống</text>
+              <text x="34" y="152" fill="#2f5e4e" font-family="monospace" font-size="11.5">▶ 18.4K lượt xem · TikTok &amp; YouTube Shorts</text>
+            </svg>
+            <span class="media-badge">Video Vlog · 01:24</span>
+          </div>
+          <div class="media-info">
+            <h3>Vlog: Một ngày làm Kỹ sư DevOps &amp; Nghiên cứu Khoa học</h3>
+            <p>Góc nhìn gần gũi, giàu năng lượng về quá trình đọc tài liệu học thuật, săn lỗi trên cụm máy chủ và cân bằng cuộc sống năng động ngoài giờ làm việc.</p>
+          </div>
+        </article>
+
+        <!-- Vlog / TikTok 2 -->
+        <article class="media-card" data-category="vlog">
+          <div class="media-thumb">
+            <svg viewBox="0 0 360 200" role="img" aria-label="TikTok Giải thích Bài báo Khoa học trong 60 giây">
+              <rect width="360" height="200" fill="#f0e8df"/>
+              <rect x="18" y="18" width="324" height="164" rx="8" fill="#ffffff" stroke="#d8c8b8"/>
+              <circle cx="300" cy="100" r="26" fill="#8c5332"/>
+              <polygon points="294,88 294,112 314,100" fill="#ffffff"/>
+              <rect x="34" y="34" width="106" height="24" rx="4" fill="#8c5332"/>
+              <text x="44" y="50" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="10">📱 TECH TIKTOK</text>
+              <text x="34" y="88" fill="#1e293b" font-family="serif" font-weight="bold" font-size="17.5">Giải thích Paper trong 60 Giây</text>
+              <text x="34" y="114" fill="#475569" font-family="sans-serif" font-size="12.5">Tóm tắt công trình nghiên cứu &amp; kiến trúc hệ thống</text>
+              <text x="34" y="152" fill="#8c5332" font-family="monospace" font-size="11.5">▶ 31.2K lượt xem · Chia sẻ Cộng đồng</text>
+            </svg>
+            <span class="media-badge">Tech TikTok · 00:58</span>
+          </div>
+          <div class="media-info">
+            <h3>Series TikTok: Giải thích Công trình Nghiên cứu &amp; Hệ thống trong 60s</h3>
+            <p>Truyền tải các kiến thức về Cloud-Native, Docker, Kubernetes và các bài báo khoa học mới theo phong cách ngắn gọn, trực quan và dễ tiếp cận.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- 6. KINH NGHIỆM, HỌC VẤN & KỸ NĂNG (EXPERIENCE & SKILLS CV)          -->
+    <!-- =================================================================== -->
+    <section id="experience" class="frosted-section reveal">
+      <h2 class="section-heading">Hành trình Kinh nghiệm &amp; Năng lực Chuyên môn (CV Summary)</h2>
+
+      <div class="cv-grid">
+        <div>
+          <h3 class="cv-sub">Kinh nghiệm Làm việc &amp; Nghiên cứu</h3>
+          <div class="cv-timeline">
+            <div class="cv-item">
+              <div class="cv-period">2026 — Hiện tại</div>
+              <h4>Cloud &amp; DevSecOps Engineer Trainee · Viettel Digital Talent</h4>
+              <p>Thiết kế, chuẩn hoá đường ống CI/CD và tự động hoá triển khai ứng dụng trên Kubernetes qua Helm &amp; ArgoCD; thiết lập hệ thống giám sát Prometheus/Grafana/EFK.</p>
+            </div>
+            <div class="cv-item">
+              <div class="cv-period">2025 — 2026</div>
+              <h4>Research &amp; Backend Developer · Phòng Lab Nghiên cứu</h4>
+              <p>Phát triển các dịch vụ backend hiệu năng cao bằng Go &amp; Python; thực hiện các thực nghiệm đánh giá hệ thống và biên soạn báo cáo khoa học.</p>
+            </div>
+            <div class="cv-item">
+              <div class="cv-period">2024 — 2026</div>
+              <h4>Tech Content Creator &amp; Speaker (Vlog / TikTok / Seminar)</h4>
+              <p>Xây dựng nội dung chia sẻ kiến thức công nghệ, thuyết trình tại các buổi sinh hoạt học thuật và kết nối cộng đồng sinh viên IT.</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="cv-sub">Tổng hợp Kỹ năng Kỹ thuật (Technical Skills)</h3>
+          <dl class="skills-table">
+            <dt>Hạ tầng Đám mây &amp; Container</dt>
+            <dd>Kubernetes (K8s), Helm Charts, Docker, BuildKit Multi-stage, Linux Administration, Nginx Ingress.</dd>
+
+            <dt>CI/CD, GitOps &amp; Bảo mật</dt>
+            <dd>Jenkins Dynamic K8s Agents, ArgoCD GitOps, GitHub Actions, Trivy, Cosign, gosec, govulncheck, Syft SBOM.</dd>
+
+            <dt>Ngôn ngữ &amp; Phát triển Hệ thống</dt>
+            <dd>Go (Golang), Python, SQL (SQLite WAL, PostgreSQL), JavaScript (ES6+, Three.js / WebGL), RESTful APIs.</dd>
+
+            <dt>Giám sát &amp; Kỹ năng Học thuật</dt>
+            <dd>Prometheus, Grafana, Fluent Bit / EFK Stack, LaTeX / Technical Writing, Thuyết trình &amp; Sáng tạo Video.</dd>
+          </dl>
+        </div>
+      </div>
+
+      <footer class="academic-footer">
+        <span>© 2026 Academic &amp; Engineering Portfolio · Nền 3D Voxel Vintage River</span>
+        <a href="#about">↑ Lên đầu trang</a>
+      </footer>
+    </section>
+
   </main>
 
-  <!-- Trang chi tiết paper -->
+  <!-- Trang chi tiết paper (Modal nền trắng trang nhã) -->
   <div id="modal" class="modal" hidden>
     <article class="sheet" role="dialog" aria-modal="true" aria-labelledby="p-title">
       <header class="sheet-head">
@@ -49,15 +444,15 @@
           <h2 id="p-title"></h2>
           <div id="p-tags" class="tags"></div>
         </div>
-        <button id="p-close" class="btn" aria-label="Đóng">✕</button>
+        <button id="p-close" class="btn-ghost" type="button" aria-label="Đóng">✕ Đóng</button>
       </header>
       <p id="p-abstract" class="abstract"></p>
       <nav id="p-links" class="links"></nav>
 
       <div class="tabs" role="tablist">
-        <button class="tab on" data-tab="pdf" role="tab">Paper</button>
-        <button class="tab" data-tab="readme" role="tab">README</button>
-        <button class="tab" data-tab="comments" role="tab">Bình luận <i id="c-count"></i></button>
+        <button class="tab on" data-tab="pdf" role="tab" type="button">Bản toàn văn (PDF)</button>
+        <button class="tab" data-tab="readme" role="tab" type="button">Tài liệu (README)</button>
+        <button class="tab" data-tab="comments" role="tab" type="button">Thảo luận <i id="c-count"></i></button>
       </div>
 
       <section id="tab-pdf" class="pane"></section>
@@ -65,16 +460,16 @@
       <section id="tab-comments" class="pane" hidden>
         <ul id="c-list" class="comments"></ul>
         <form id="c-form" class="c-form" hidden>
-          <p id="c-replying" class="replying" hidden><span id="c-replying-to"></span> <button id="c-replying-x" class="btn" type="button" aria-label="Huỷ trả lời">✕</button></p>
-          <textarea id="c-body" maxlength="1000" rows="3" placeholder="Viết bình luận (tối đa 1000 ký tự)"></textarea>
-          <button class="btn primary" type="submit">Gửi</button>
+          <p id="c-replying" class="replying" hidden><span id="c-replying-to"></span> <button id="c-replying-x" class="btn-ghost" type="button" aria-label="Huỷ trả lời">✕</button></p>
+          <textarea id="c-body" maxlength="1000" rows="3" placeholder="Viết bình luận hoặc câu hỏi thảo luận học thuật (tối đa 1000 ký tự)"></textarea>
+          <button class="btn primary" type="submit">Gửi bình luận</button>
         </form>
-        <p id="c-login" class="muted" hidden>Đăng nhập GitHub để bình luận.</p>
+        <p id="c-login" class="muted" hidden>Đăng nhập GitHub để tham gia thảo luận.</p>
       </section>
 
       <footer id="p-admin" class="admin" hidden>
-        <label class="btn">Tải PDF lên<input id="p-file" type="file" accept="application/pdf" hidden></label>
-        <button id="p-delete" class="btn danger">Xoá paper</button>
+        <label class="btn-ghost">Tải PDF lên<input id="p-file" type="file" accept="application/pdf" hidden></label>
+        <button id="p-delete" class="btn danger" type="button">Xoá paper</button>
       </footer>
     </article>
   </div>
@@ -82,15 +477,15 @@
   <!-- Form tạo paper (admin) -->
   <div id="modal-new" class="modal" hidden>
     <form id="new-form" class="sheet narrow">
-      <header class="sheet-head"><h2>Paper mới</h2><button type="button" id="n-close" class="btn" aria-label="Đóng">✕</button></header>
-      <label>Tiêu đề<input name="title" required maxlength="200"></label>
-      <label>Tóm tắt<textarea name="abstract" rows="4" maxlength="4000"></textarea></label>
-      <label>Tag (cách nhau bằng dấu phẩy)<input name="tags"></label>
+      <header class="sheet-head"><h2>Thêm Công bố / Paper mới</h2><button type="button" id="n-close" class="btn-ghost" aria-label="Đóng">✕</button></header>
+      <label>Tiêu đề công bố<input name="title" required maxlength="200"></label>
+      <label>Tóm tắt (Abstract)<textarea name="abstract" rows="4" maxlength="4000"></textarea></label>
+      <label>Từ khoá / Tag (cách nhau bằng dấu phẩy)<input name="tags"></label>
       <label>Repo GitHub<input name="repo_url" placeholder="https://github.com/owner/repo"></label>
-      <label>Video (https)<input name="video_url" placeholder="https://..."></label>
-      <label>Demo (https)<input name="demo_url" placeholder="https://..."></label>
+      <label>Video thuyết trình (https)<input name="video_url" placeholder="https://..."></label>
+      <label>Trang Demo (https)<input name="demo_url" placeholder="https://..."></label>
       <p id="n-error" class="error" hidden></p>
-      <button class="btn primary" type="submit">Tạo</button>
+      <button class="btn primary" type="submit">Tạo công bố</button>
     </form>
   </div>
 

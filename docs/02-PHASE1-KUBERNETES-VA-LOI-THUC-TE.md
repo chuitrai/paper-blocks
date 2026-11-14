@@ -136,7 +136,7 @@ Mỗi lỗi: **Triệu chứng → Vì sao → Cách xử lý → Bài học**.
 - Vagrant ghi nhớ "đã thử", không phải "đã thành công". Đừng tin dòng này: kiểm tra thực tế bằng `kubectl get nodes` trên master, rồi ép chạy lại bằng `vagrant provision <máy> --provision-with <tên>`.
 
 **D6. VM "ma" / thư mục rác sau `destroy` bị gián đoạn** *(gặp thật)*
-- `VERR_ALREADY_EXISTS` hoặc `VERR_FILE_NOT_FOUND` khi đổi tên `temp_clone_...`. Nguyên nhân: `destroy` khi còn phiên SSH/cửa sổ VM mở. Xử lý: `VBoxManage unregistervm <uuid>` (không `--delete` nếu file đã mất), `closemedium` ổ đĩa mất, xoá thư mục `temp_clone_*` trong `VirtualBox VMs`, xoá `.vagrant/`. **Không đụng VM gốc `ubuntu-22.04-amd64_...`.** Chi tiết: `theory/01-phase-1.1-vagrant.md` mục 5 và 7.
+- `VERR_ALREADY_EXISTS` hoặc `VERR_FILE_NOT_FOUND` khi đổi tên `temp_clone_...`. Nguyên nhân: `destroy` khi còn phiên SSH/cửa sổ VM mở. Xử lý: `VBoxManage unregistervm <uuid>` (không `--delete` nếu file đã mất), `closemedium` ổ đĩa mất, xoá thư mục `temp_clone_*` trong `VirtualBox VMs`, xoá `.vagrant/`. **Không đụng VM gốc `ubuntu-22.04-amd64_...`.** Chi tiết: `theory/00-LY-THUYET-TONG-HOP.md` mục A1.5 và A1.8.
 
 ### Nhóm E — Vận hành (những thứ chỉ lộ sau vài ngày)
 

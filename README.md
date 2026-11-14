@@ -9,9 +9,7 @@
 3. [`docs/03-PHASE2-APP-PIPELINE-QUEST.md`](docs/03-PHASE2-APP-PIPELINE-QUEST.md) — Phase 2: ứng dụng demo "Paper Blocks" (API, giao diện 3D, lỗi thực tế).
 4. [`docs/04-PHASE3-HELM-ARGOCD-JENKINS.md`](docs/04-PHASE3-HELM-ARGOCD-JENKINS.md) — Phase 3: Helm chart, config repo, ArgoCD, Jenkins (đang làm; có các quyết định đã chốt).
 
-Tài liệu lý thuyết (đọc để hiểu, không thuộc bộ tài liệu bắt buộc của dự án) nằm ở [`theory/`](theory/):
-- [`theory/01-phase-1.1-vagrant.md`](theory/01-phase-1.1-vagrant.md) — Phase 1.1: Vagrant (khái niệm, mổ xẻ Vagrantfile, business case, lỗi thực tế, bảo mật). Phase 1.2 (các file setup Kubernetes) sẽ là file kế tiếp.
-- [`theory/02-phase-2-ban-do-ly-thuyet.md`](theory/02-phase-2-ban-do-ly-thuyet.md) — Phase 2: bản đồ kiến thức (HTTP, JWT/RBAC, middleware, rate limit, observability, Docker) và 15 tình huống business hay gặp.
+Tài liệu lý thuyết (đọc để hiểu, không thuộc bộ tài liệu bắt buộc của dự án) là một file duy nhất: [`theory/00-LY-THUYET-TONG-HOP.md`](theory/00-LY-THUYET-TONG-HOP.md). Gồm Vagrant, Kubernetes/kubeadm, ứng dụng (HTTP, JWT/RBAC, rate limit, SQLite, OAuth, Docker), Helm/storage/GitOps/ArgoCD, Jenkins/Fast-Lane, câu tự kiểm tra, kế hoạch đọc một ngày và danh sách nguồn tham khảo.
 
 Chạy Phase 1 (Git Bash): `cd infra/vagrant && vagrant up && vagrant ssh master -c "bash /vagrant/verify.sh"`
 

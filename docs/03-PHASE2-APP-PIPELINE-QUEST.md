@@ -148,4 +148,4 @@ Bài học chung: khi mã trạng thái là `000`, hay một kết quả không 
 
 ## 11. Kiến thức nền
 
-Xem `theory/02-phase-2-ban-do-ly-thuyet.md` (HTTP, JWT/RBAC, middleware, rate limit, observability, Docker). Phần OAuth, tải file và SQLite trên Kubernetes tôi sẽ bổ sung vào cùng file khi làm bước tương ứng.
+Xem `theory/00-LY-THUYET-TONG-HOP.md` Phần B (HTTP, JWT/RBAC, middleware, rate limit, observability, SQLite/upload/OAuth, Docker, tình huống business).
