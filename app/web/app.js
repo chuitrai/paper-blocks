@@ -36,8 +36,78 @@ function explain(e) {
   return e.message || "Có lỗi xảy ra";
 }
 
+const STATIC_PAPERS = [
+  {
+    id: 1,
+    title: "EgressGap: Measuring Residual Data Exfiltration Under CI/CD Egress Allowlists",
+    abstract:
+      "Nghiên cứu tại Cyber Information Security Lab (National Chung Cheng University, Đài Loan) cùng PGS.TS. Nguyễn Văn Linh. Phân tích cơ chế egress allowlist trên GitHub Actions và Kubernetes, đo lường lượng dữ liệu vẫn có thể thoát ra ngoài qua các đích được cho phép. Bài báo đã gửi đăng tại IEEE ICC 2027.",
+    tags: ["CI/CD Security", "Kubernetes", "GitHub Actions", "IEEE ICC 2027"],
+    repo_url: "https://github.com/chuitrai/EgressGap",
+    has_pdf: false,
+    views: 128,
+    comment_count: 0,
+  },
+  {
+    id: 2,
+    title: "Cloud-Native Application Deployment & Observability Platform (Viettel Digital Talent)",
+    abstract:
+      "Thiết kế đường ống CI/CD và GitOps cho kiến trúc microservices: tự động dựng cụm Kubernetes (Kubeadm, Vagrant, Ansible), build/deploy qua Jenkins, Helm & ArgoCD, giám sát Prometheus + Grafana và tập trung log với EFK Stack.",
+    tags: ["Kubernetes", "Helm", "ArgoCD", "Observability"],
+    repo_url: "https://github.com/chuitrai/VDT_Final_Project",
+    has_pdf: false,
+    views: 96,
+    comment_count: 0,
+  },
+  {
+    id: 3,
+    title: "AquaSafe: Flood Map with Severity Levels and Prediction (Data For Life 2025)",
+    abstract:
+      "Hệ thống bản đồ web hiển thị mức độ ngập lụt và cảnh báo dự báo theo thời gian thực. Đạt Giải Triển vọng (Promising Award — Top 30 / 2.600+ đội thi) tại cuộc thi quốc tế Data For Life 2025 do Bộ Công An tổ chức.",
+    tags: ["Web Map", "Data For Life 2025", "React", "AI Prediction"],
+    repo_url: "https://github.com/chuitrai/AquaSafe_FE",
+    has_pdf: false,
+    views: 84,
+    comment_count: 0,
+  },
+  {
+    id: 4,
+    title: "Multimodal Image & Text Query System for Large-Scale Video Dataset (AI Challenge 2024)",
+    abstract:
+      "Hệ thống truy vấn sự kiện video quy mô lớn bằng văn bản hoặc hình ảnh sử dụng TransNet để trích xuất keyframe, FAISS để tìm kiếm vector tốc độ cao và giao diện Streamlit. Lọt vào Vòng Chung kết (Finalist) AI Challenge TP.HCM 2024.",
+    tags: ["AI Vision", "TransNet", "FAISS", "Python"],
+    repo_url: "https://github.com/chuitrai/AIC_Challenge",
+    has_pdf: false,
+    views: 75,
+    comment_count: 0,
+  },
+  {
+    id: 5,
+    title: "Paper Blocks: Research Portfolio & Fast-Lane CI/CD Platform",
+    abstract:
+      "Nền tảng trình bày công trình nghiên cứu học thuật kết hợp nền 3D Voxel Shader (Three.js), backend Go 1.24 + SQLite WAL, Helm Chart multi-source với ArgoCD GitOps.",
+    tags: ["Go", "WebGL", "Helm", "ArgoCD"],
+    repo_url: "https://github.com/chuitrai/paper-blocks",
+    has_pdf: false,
+    views: 62,
+    comment_count: 0,
+  },
+  {
+    id: 6,
+    title: "High-Performance HTTP/HTTPS Proxy Server from Scratch in C++",
+    abstract:
+      "Thiết kế và cài đặt Proxy Server hiệu năng cao từ đầu bằng C++ (Windows API, Socket Programming), hỗ trợ định tuyến HTTP/HTTPS, lọc website theo domain/IP và ghi nhật ký truy cập.",
+    tags: ["C++", "Networking", "HTTP/HTTPS", "Security"],
+    repo_url: "https://github.com/chuitrai/Proxy_server",
+    has_pdf: false,
+    views: 54,
+    comment_count: 0,
+  },
+];
+
 const state = {
   all: [],
+  staticMode: false,
   me: null,
   methods: { github: false, password: false },
   current: null,
@@ -97,8 +167,14 @@ async function loadMe() {
 // ----- danh sách công bố khoa học + thế giới -----
 let world;
 async function loadPapers() {
-  const data = await api("/papers");
-  state.all = data.papers || [];
+  try {
+    const data = await api("/papers");
+    state.staticMode = false;
+    state.all = data.papers || [];
+  } catch {
+    state.staticMode = true;
+    state.all = STATIC_PAPERS;
+  }
   world.setPapers(state.all);
   await renderList();
   loadTags();
@@ -109,14 +185,27 @@ async function renderList() {
   const f = state.filter;
   let papers = state.all;
   if (f.q || f.tag) {
-    const qs = new URLSearchParams();
-    if (f.q) qs.set("q", f.q);
-    if (f.tag) qs.set("tag", f.tag);
-    try {
-      papers = (await api("/papers?" + qs)).papers || [];
-    } catch (e) {
-      toast(explain(e), true);
-      return;
+    if (state.staticMode) {
+      const qLower = f.q.toLowerCase();
+      papers = state.all.filter((p) => {
+        const matchTag = !f.tag || (p.tags || []).includes(f.tag);
+        const matchQ =
+          !qLower ||
+          p.title.toLowerCase().includes(qLower) ||
+          (p.abstract || "").toLowerCase().includes(qLower) ||
+          (p.tags || []).some((t) => t.toLowerCase().includes(qLower));
+        return matchTag && matchQ;
+      });
+    } else {
+      const qs = new URLSearchParams();
+      if (f.q) qs.set("q", f.q);
+      if (f.tag) qs.set("tag", f.tag);
+      try {
+        papers = (await api("/papers?" + qs)).papers || [];
+      } catch (e) {
+        toast(explain(e), true);
+        return;
+      }
     }
   }
   const list = $("list");
@@ -158,7 +247,16 @@ async function renderList() {
 
 async function loadTags() {
   try {
-    const { tags } = await api("/tags");
+    let tags;
+    if (state.staticMode) {
+      const counts = new Map();
+      for (const p of state.all) {
+        for (const t of p.tags || []) counts.set(t, (counts.get(t) || 0) + 1);
+      }
+      tags = [...counts.entries()].map(([tag, count]) => ({ tag, count }));
+    } else {
+      tags = (await api("/tags")).tags;
+    }
     const box = $("tags");
     box.replaceChildren();
     for (const t of tags) {
@@ -178,6 +276,10 @@ async function loadTags() {
 }
 
 async function loadStats() {
+  if (state.staticMode) {
+    $("stats").textContent = `${state.all.length} công bố & dự án nghiên cứu`;
+    return;
+  }
   try {
     const s = await api("/stats");
     $("stats").textContent = `${s.papers} công bố · ${s.comments} thảo luận · ${s.views} lượt đọc`;
@@ -208,16 +310,23 @@ function showTab(name) {
 
 async function openPaper(id) {
   let p;
-  try {
-    p = await api("/papers/" + id);
-  } catch (e) {
-    toast(explain(e), true);
-    return;
+  if (state.staticMode) {
+    p = state.all.find((item) => item.id === id);
+    if (!p) return;
+  } else {
+    try {
+      p = await api("/papers/" + id);
+    } catch (e) {
+      toast(explain(e), true);
+      return;
+    }
   }
   state.current = p;
   state.replyTo = null;
 
-  api(`/papers/${p.id}/view`, { method: "POST" }).catch(() => {});
+  if (!state.staticMode) {
+    api(`/papers/${p.id}/view`, { method: "POST" }).catch(() => {});
+  }
   world.setPaused(true);
   $("p-title").textContent = p.title;
   $("p-abstract").textContent = p.abstract || "";
@@ -541,7 +650,7 @@ async function boot() {
   try {
     state.methods = await api("/auth/methods");
   } catch {
-    toast("Không kết nối được máy chủ API", true);
+    state.methods = { github: false, password: false };
   }
   await loadMe();
   if (login?.loggedIn && state.me) toast("Xin chào " + shortName(state.me.user));
