@@ -39,17 +39,29 @@ function explain(e) {
 const STATIC_PAPERS = [
   {
     id: 1,
-    title: "EgressGap: Measuring Residual Data Exfiltration Under CI/CD Egress Allowlists",
+    title: "Graph-Derived Controls for Patient Identifier Leakage in Medical Graph RAG",
     abstract:
-      "Nghiên cứu tại Cyber Information Security Lab (National Chung Cheng University, Đài Loan) cùng PGS.TS. Nguyễn Văn Linh. Phân tích cơ chế egress allowlist trên GitHub Actions và Kubernetes, đo lường lượng dữ liệu vẫn có thể thoát ra ngoài qua các đích được cho phép. Bài báo đã gửi đăng tại IEEE ICC 2027.",
-    tags: ["CI/CD Security", "Kubernetes", "GitHub Actions", "IEEE ICC 2027"],
-    repo_url: "https://github.com/chuitrai/EgressGap",
-    has_pdf: false,
-    views: 128,
+      "Tác giả: Dinh Ngoc Bao Vu, Ngoc Duy My Nguyen, Mai-Khiem Tran, Minh-Hoang Le, Minh-Triet Tran (HCMUS · ACIIDS 2027). Nghiên cứu rò rỉ định danh bệnh nhân (PII) trên LightRAG và plain RAG với hội thoại y khoa HealthCareMagic. Đề xuất bộ lọc ngữ cảnh từ chính đồ thị (P2q: giảm rò rỉ tên từ 35.0%/66.2% xuống 1.2% không cần model tại query time) và cơ chế cắt tỉa theo nguồn gốc + băm ID theo từng truy vấn (P4: đưa liên kết chẩn đoán-bệnh nhân về 0%).",
+    tags: ["Graph RAG", "Privacy-preserving AI", "PII Leakage", "ACIIDS 2027"],
+    pdf_url: "./papers/ACIIDS_2027_Patient_Identifier_Leakage_Graph_RAG.pdf",
+    has_pdf: true,
+    views: 156,
     comment_count: 0,
   },
   {
     id: 2,
+    title: "Measuring Egress-Allowlist Reachability in GitHub Actions from Multi-Source CI Data",
+    abstract:
+      "Tác giả: Dinh Ngoc Bao Vu, Van-Linh Nguyen (HCMUS & National Chung Cheng University, Taiwan · IEEE ICC 2027 SAC-BigData). Thu thập 7,137 egress allowlists trên 1,358 repo GitHub Actions dùng Harden-Runner, kết hợp dữ liệu workflow, sở hữu IP/co-tenancy và log chạy CI. Chỉ ra 56.7% allowlist chứa đích dùng chung IP hoặc dịch vụ exfiltration; siết tĩnh giảm xuống 25.0% nhưng làm hỏng 98.4% repo; phát hiện lỗi chọn nhầm run log (45.9% -> 15.5%) và suy giảm âm thầm (6.4%).",
+    tags: ["CI/CD Security", "GitHub Actions", "Egress Filtering", "IEEE ICC 2027"],
+    repo_url: "https://github.com/chuitrai/EgressGap",
+    pdf_url: "./papers/EgressGap_ICC2027_SAC-BigData.pdf",
+    has_pdf: true,
+    views: 142,
+    comment_count: 0,
+  },
+  {
+    id: 3,
     title: "Cloud-Native Application Deployment & Observability Platform (Viettel Digital Talent)",
     abstract:
       "Thiết kế đường ống CI/CD và GitOps cho kiến trúc microservices: tự động dựng cụm Kubernetes (Kubeadm, Vagrant, Ansible), build/deploy qua Jenkins, Helm & ArgoCD, giám sát Prometheus + Grafana và tập trung log với EFK Stack.",
@@ -60,7 +72,7 @@ const STATIC_PAPERS = [
     comment_count: 0,
   },
   {
-    id: 3,
+    id: 4,
     title: "AquaSafe: Flood Map with Severity Levels and Prediction (Data For Life 2025)",
     abstract:
       "Hệ thống bản đồ web hiển thị mức độ ngập lụt và cảnh báo dự báo theo thời gian thực. Đạt Giải Triển vọng (Promising Award — Top 30 / 2.600+ đội thi) tại cuộc thi quốc tế Data For Life 2025 do Bộ Công An tổ chức.",
@@ -71,7 +83,7 @@ const STATIC_PAPERS = [
     comment_count: 0,
   },
   {
-    id: 4,
+    id: 5,
     title: "Multimodal Image & Text Query System for Large-Scale Video Dataset (AI Challenge 2024)",
     abstract:
       "Hệ thống truy vấn sự kiện video quy mô lớn bằng văn bản hoặc hình ảnh sử dụng TransNet để trích xuất keyframe, FAISS để tìm kiếm vector tốc độ cao và giao diện Streamlit. Lọt vào Vòng Chung kết (Finalist) AI Challenge TP.HCM 2024.",
@@ -82,7 +94,7 @@ const STATIC_PAPERS = [
     comment_count: 0,
   },
   {
-    id: 5,
+    id: 6,
     title: "Paper Blocks: Research Portfolio & Fast-Lane CI/CD Platform",
     abstract:
       "Nền tảng trình bày công trình nghiên cứu học thuật kết hợp nền 3D Voxel Shader (Three.js), backend Go 1.24 + SQLite WAL, Helm Chart multi-source với ArgoCD GitOps.",
@@ -93,7 +105,7 @@ const STATIC_PAPERS = [
     comment_count: 0,
   },
   {
-    id: 6,
+    id: 7,
     title: "High-Performance HTTP/HTTPS Proxy Server from Scratch in C++",
     abstract:
       "Thiết kế và cài đặt Proxy Server hiệu năng cao từ đầu bằng C++ (Windows API, Socket Programming), hỗ trợ định tuyến HTTP/HTTPS, lọc website theo domain/IP và ghi nhật ký truy cập.",
@@ -340,7 +352,9 @@ async function openPaper(id) {
   }
   const pdf = $("tab-pdf");
   pdf.replaceChildren();
-  if (p.has_pdf) {
+  if (p.pdf_url) {
+    pdf.append(h("iframe", { src: p.pdf_url, title: "PDF: " + p.title }));
+  } else if (p.has_pdf) {
     pdf.append(h("iframe", { src: `/api/v1/papers/${p.id}/file`, title: "PDF: " + p.title }));
   } else {
     pdf.append(h("p", { class: "muted", text: "Paper này chưa có file PDF." }));
