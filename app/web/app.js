@@ -43,6 +43,7 @@ const STATIC_PAPERS = [
     abstract:
       "Tác giả: Dinh Ngoc Bao Vu, Ngoc Duy My Nguyen, Mai-Khiem Tran, Minh-Hoang Le, Minh-Triet Tran (HCMUS · ACIIDS 2027). Nghiên cứu rò rỉ định danh bệnh nhân (PII) trên LightRAG và plain RAG với hội thoại y khoa HealthCareMagic. Đề xuất bộ lọc ngữ cảnh từ chính đồ thị (P2q: giảm rò rỉ tên từ 35.0%/66.2% xuống 1.2% không cần model tại query time) và cơ chế cắt tỉa theo nguồn gốc + băm ID theo từng truy vấn (P4: đưa liên kết chẩn đoán-bệnh nhân về 0%).",
     tags: ["Graph RAG", "Privacy-preserving AI", "PII Leakage", "ACIIDS 2027"],
+    thumb_url: "./assets/graphrag-overview.png",
     pdf_url: "./papers/ACIIDS_2027_Patient_Identifier_Leakage_Graph_RAG.pdf",
     has_pdf: true,
     views: 156,
@@ -55,6 +56,7 @@ const STATIC_PAPERS = [
       "Tác giả: Dinh Ngoc Bao Vu, Van-Linh Nguyen (HCMUS & National Chung Cheng University, Taiwan · IEEE ICC 2027 SAC-BigData). Thu thập 7,137 egress allowlists trên 1,358 repo GitHub Actions dùng Harden-Runner, kết hợp dữ liệu workflow, sở hữu IP/co-tenancy và log chạy CI. Chỉ ra 56.7% allowlist chứa đích dùng chung IP hoặc dịch vụ exfiltration; siết tĩnh giảm xuống 25.0% nhưng làm hỏng 98.4% repo; phát hiện lỗi chọn nhầm run log (45.9% -> 15.5%) và suy giảm âm thầm (6.4%).",
     tags: ["CI/CD Security", "GitHub Actions", "Egress Filtering", "IEEE ICC 2027"],
     repo_url: "https://github.com/chuitrai/EgressGap",
+    thumb_url: "./assets/egressgap-overview.png",
     pdf_url: "./papers/EgressGap_ICC2027_SAC-BigData.pdf",
     has_pdf: true,
     views: 142,
@@ -233,12 +235,14 @@ async function renderList() {
     return;
   }
   for (const [idx, p] of papers.entries()) {
-    const thumb = h(
-      "div",
-      { class: "pub-thumb", "aria-hidden": "true" },
-      h("span", { class: "pub-thumb-type", text: p.has_pdf ? "PDF PAPER" : "RESEARCH" }),
-      h("span", { class: "pub-thumb-icon", text: `Paper #${idx + 1}` })
-    );
+    const thumb = p.thumb_url
+      ? h("div", { class: "pub-thumb has-img", "aria-hidden": "true" }, h("img", { src: p.thumb_url, alt: "" }))
+      : h(
+          "div",
+          { class: "pub-thumb", "aria-hidden": "true" },
+          h("span", { class: "pub-thumb-type", text: p.has_pdf ? "PDF PAPER" : "RESEARCH" }),
+          h("span", { class: "pub-thumb-icon", text: `Paper #${idx + 1}` })
+        );
     const tags = h("div", { class: "tags" }, ...(p.tags || []).map((t) => h("span", { text: t })));
     const meta = h("small", {
       class: "meta",

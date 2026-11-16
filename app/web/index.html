@@ -63,27 +63,7 @@
         <!-- Cột trái: Ảnh chân dung, Chức danh & Liên kết Học thuật -->
         <aside class="bio-sidebar">
           <div class="portrait-frame">
-            <svg class="portrait-svg" viewBox="0 0 240 260" role="img" aria-label="Ảnh chân dung">
-              <defs>
-                <linearGradient id="vintBg" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#e6dfd3"/>
-                  <stop offset="100%" stop-color="#c8d6d9"/>
-                </linearGradient>
-              </defs>
-              <rect width="240" height="260" fill="url(#vintBg)"/>
-              <circle cx="120" cy="115" r="88" fill="#ffffff" opacity="0.55"/>
-              <!-- Minh hoạ chân dung lịch sự, học thuật -->
-              <path d="M52 260 C52 195 188 195 188 260 Z" fill="#2d4a53"/>
-              <path d="M98 188 L120 225 L142 188 Z" fill="#f7f4ef"/>
-              <rect x="108" y="160" width="24" height="34" fill="#e2b496"/>
-              <rect x="82" y="72" width="76" height="92" rx="36" fill="#ebbda0"/>
-              <path d="M78 102 C78 56 162 56 162 102 C152 82 90 82 78 102 Z" fill="#3b2d26"/>
-              <!-- Kính gọng mảnh tri thức -->
-              <rect x="92" y="106" width="24" height="15" rx="3" fill="none" stroke="#334155" stroke-width="2.2"/>
-              <rect x="124" y="106" width="24" height="15" rx="3" fill="none" stroke="#334155" stroke-width="2.2"/>
-              <line x1="116" y1="113" x2="124" y2="113" stroke="#334155" stroke-width="2.2"/>
-              <path d="M108 140 Q120 148 132 140" fill="none" stroke="#8c5842" stroke-width="2.5" stroke-linecap="round"/>
-            </svg>
+            <img src="./assets/portrait.png" alt="Ảnh chân dung Vũ Đình Ngọc Bảo">
           </div>
 
           <h2 class="scholar-name">Vũ Đình Ngọc Bảo</h2>
@@ -204,26 +184,33 @@
       <p class="section-sub">Các hệ thống phần mềm và hạ tầng đám mây được thiết kế, đo kiểm và vận hành thực tế.</p>
 
       <div class="academic-item-list">
+        <!-- Project 0: GraphRAG Privacy (ACIIDS 2027) -->
+        <article class="academic-row">
+          <div class="row-thumb">
+            <img src="./assets/graphrag-overview.png" alt="Kiến trúc bảo vệ định danh bệnh nhân trong Medical Graph RAG (P2q / P4)">
+          </div>
+          <div class="row-body">
+            <h3>Graph-Derived Controls for Patient Identifier Leakage in Medical Graph RAG</h3>
+            <p class="row-authors"><b>Vai trò:</b> First Author · <b>Đơn vị:</b> SELab — ĐH Khoa học Tự nhiên, ĐHQG-HCM · <b>Hội nghị:</b> ACIIDS 2027</p>
+            <p class="row-desc">
+              Xây dựng hệ thống đánh giá và kiểm soát rò rỉ định danh bệnh nhân (PII) trên LightRAG &amp; Plain RAG. Đề xuất bộ lọc <b>P2q</b> (từ điển thực thể từ đồ thị) và <b>P4</b> (cắt tỉa theo nguồn gốc + băm ID theo truy vấn), đưa liên kết bệnh nhân-chẩn đoán về <b>0%</b>.
+            </p>
+            <div class="tags">
+              <span>Graph RAG</span><span>LightRAG</span><span>Privacy-preserving AI</span><span>ACIIDS 2027</span>
+            </div>
+          </div>
+        </article>
+
         <!-- Project 1: EgressGap (CCU Taiwan / IEEE ICC 2027) -->
         <article class="academic-row">
           <div class="row-thumb">
-            <svg viewBox="0 0 220 140" role="img" aria-label="EgressGap CI/CD Security">
-              <rect width="220" height="140" rx="8" fill="#eef2f6"/>
-              <rect x="14" y="16" width="192" height="108" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
-              <rect x="26" y="30" width="60" height="32" rx="4" fill="#fee2e2" stroke="#dc2626"/>
-              <text x="33" y="50" fill="#991b1b" font-family="sans-serif" font-weight="bold" font-size="9.5">CI Runner</text>
-              <line x1="86" y1="46" x2="108" y2="46" stroke="#64748b" stroke-width="2"/>
-              <rect x="108" y="30" width="84" height="32" rx="4" fill="#fef3c7" stroke="#d97706"/>
-              <text x="115" y="50" fill="#92400e" font-family="sans-serif" font-weight="bold" font-size="9.5">Egress Allowlist</text>
-              <text x="26" y="90" fill="#1e293b" font-family="monospace" font-size="9.5">EgressGap · CCU Taiwan</text>
-              <text x="26" y="108" fill="#0f766e" font-family="monospace" font-size="9.5">Submitted to IEEE ICC 2027</text>
-            </svg>
+            <img src="./assets/egressgap-overview.png" alt="Pipeline đo lường Egress-Allowlist Reachability trong GitHub Actions (EgressGap)">
           </div>
           <div class="row-body">
             <h3>EgressGap — Phân tích Rò rỉ Dữ liệu qua Egress Allowlist trong CI/CD</h3>
-            <p class="row-authors"><b>Vai trò:</b> Research Intern · <b>Đơn vị:</b> Cyber Information Security Lab, CCU (Đài Loan) · <a href="https://github.com/chuitrai/EgressGap" target="_blank" rel="noopener noreferrer">github.com/chuitrai/EgressGap</a></p>
+            <p class="row-authors"><b>Vai trò:</b> First Author · <b>Đơn vị:</b> Cyber Information Security Lab, CCU (Đài Loan) · <a href="https://github.com/chuitrai/EgressGap" target="_blank" rel="noopener noreferrer">github.com/chuitrai/EgressGap</a></p>
             <p class="row-desc">
-              Nghiên cứu cơ chế egress allowlist trên GitHub Actions và Kubernetes, đo lường lượng dữ liệu vẫn có thể thoát ra ngoài qua các đích được cho phép. Đồng tác giả bài báo khoa học cùng PGS.TS. Nguyễn Văn Linh (đã gửi đăng <b>IEEE ICC 2027</b>).
+              Phân tích 7.137 egress allowlist trên 1.358 repo GitHub Actions dùng Harden-Runner, kết hợp dữ liệu workflow, sở hữu IP/co-tenancy và log chạy CI. Đồng tác giả bài báo khoa học cùng PGS.TS. Nguyễn Văn Linh (gửi đăng <b>IEEE ICC 2027</b>).
             </p>
             <div class="tags">
               <span>CI/CD Security</span><span>GitHub Actions</span><span>Kubernetes</span><span>IEEE ICC 2027</span>
@@ -234,16 +221,7 @@
         <!-- Project 2: AquaSafe (Data For Life 2025) -->
         <article class="academic-row">
           <div class="row-thumb">
-            <svg viewBox="0 0 220 140" role="img" aria-label="AquaSafe Flood Map">
-              <rect width="220" height="140" rx="8" fill="#e6f2f5"/>
-              <rect x="14" y="16" width="192" height="108" rx="6" fill="#ffffff" stroke="#bae6fd"/>
-              <circle cx="62" cy="60" r="24" fill="#38bdf8" opacity="0.35"/>
-              <circle cx="62" cy="60" r="12" fill="#0284c7" opacity="0.6"/>
-              <circle cx="136" cy="54" r="16" fill="#f59e0b" opacity="0.45"/>
-              <text x="26" y="34" fill="#0369a1" font-family="sans-serif" font-weight="bold" font-size="10">AquaSafe · Flood Map</text>
-              <text x="26" y="102" fill="#334155" font-family="monospace" font-size="9.5">Data For Life 2025</text>
-              <text x="26" y="116" fill="#0f766e" font-family="monospace" font-size="9.5">Top 30 / 2,600+ đội thi</text>
-            </svg>
+            <img class="photo" src="./assets/data4life.jpg" alt="Đội thi AquaSafe tại Data For Life 2025">
           </div>
           <div class="row-body">
             <h3>AquaSafe — Bản đồ Ngập lụt theo Mức độ &amp; Dự báo Thời gian thực</h3>
@@ -337,40 +315,24 @@
         <!-- Hoạt động 1: CCU Taiwan -->
         <article class="media-card" data-category="event">
           <div class="media-thumb">
-            <svg viewBox="0 0 360 200" role="img" aria-label="National Chung Cheng University Taiwan">
-              <rect width="360" height="200" fill="#dde7ea"/>
-              <rect x="18" y="18" width="324" height="164" rx="8" fill="#ffffff" stroke="#c2d3d8"/>
-              <rect x="34" y="34" width="138" height="24" rx="4" fill="#1e3a8a"/>
-              <text x="44" y="50" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="10">TAIWAN RESEARCH 2026</text>
-              <text x="34" y="88" fill="#1e293b" font-family="serif" font-weight="bold" font-size="17.5">National Chung Cheng Univ.</text>
-              <text x="34" y="114" fill="#475569" font-family="sans-serif" font-size="12.5">Cyber Information Security Lab · TEEP / CCU CoE</text>
-              <text x="34" y="152" fill="#1e3a8a" font-family="monospace" font-size="11.5">📍 Đài Loan · Bảo mật CI/CD &amp; IEEE ICC 2027</text>
-            </svg>
-            <span class="media-badge">Nghiên cứu Quốc tế · 2026</span>
+            <img src="./assets/teep-taiwan.jpg" alt="Thực tập nghiên cứu TEEP tại National Chung Cheng University, Đài Loan">
+            <span class="media-badge">Nghiên cứu Quốc tế · TEEP 2026</span>
           </div>
           <div class="media-info">
             <h3>Thực tập Nghiên cứu tại National Chung Cheng University (Đài Loan)</h3>
-            <p>Nhận học bổng quốc tế CCU/CoE 2026, nghiên cứu bảo mật egress allowlist trong CI/CD cùng PGS.TS. Nguyễn Văn Linh và hoàn thiện bài báo gửi IEEE ICC 2027.</p>
+            <p>Nhận học bổng quốc tế CCU/CoE 2026 (TEEP), nghiên cứu bảo mật egress allowlist trong CI/CD cùng PGS.TS. Nguyễn Văn Linh và hoàn thiện bài báo gửi IEEE ICC 2027.</p>
           </div>
         </article>
 
         <!-- Hoạt động 2: Data For Life & AI Challenge & ICPC -->
         <article class="media-card" data-category="event">
           <div class="media-thumb">
-            <svg viewBox="0 0 360 200" role="img" aria-label="Data For Life & AI Challenge & ICPC">
-              <rect width="360" height="200" fill="#e8e2d5"/>
-              <rect x="18" y="18" width="324" height="164" rx="8" fill="#ffffff" stroke="#d4cbb8"/>
-              <rect x="34" y="34" width="130" height="24" rx="4" fill="#991b1b"/>
-              <text x="44" y="50" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="10">COMPETITIONS</text>
-              <text x="34" y="88" fill="#1e293b" font-family="serif" font-weight="bold" font-size="17.5">Data For Life &amp; AI Challenge</text>
-              <text x="34" y="114" fill="#475569" font-family="sans-serif" font-size="12.5">Top 30/2.600+ Data For Life · Finalist AIC HCMC</text>
-              <text x="34" y="152" fill="#0f766e" font-family="monospace" font-size="11.5">🏆 ICPC Southern · NET Challenge · VPBank Hack</text>
-            </svg>
-            <span class="media-badge">Cuộc thi &amp; Giải thưởng · 2024–2025</span>
+            <img src="./assets/data4life.jpg" alt="Đạt Giải Triển vọng cuộc thi Data For Life 2025">
+            <span class="media-badge">Giải Triển vọng · Data For Life 2025</span>
           </div>
           <div class="media-info">
             <h3>Giải Triển vọng Data For Life 2025 &amp; Chung kết AI Challenge TP.HCM</h3>
-            <p>Đạt Giải Triển vọng Data For Life 2025 (Bộ Công An), lọt Chung kết AI Challenge TP.HCM 2024, thi đấu ICPC Southern 2024, VPBank Hackathon 2025 &amp; NET Challenge 2024.</p>
+            <p>Đạt Giải Triển vọng Data For Life 2025 (Bộ Công An, Top 30/2.600+), lọt Chung kết AI Challenge TP.HCM 2024, thi đấu ICPC Southern 2024, VPBank Hackathon 2025 &amp; NET Challenge 2024.</p>
           </div>
         </article>
 
@@ -413,6 +375,10 @@
           <div class="media-info">
             <h3>Góc Sáng tạo: Tech Vlog &amp; TikTok (<a href="https://www.tiktok.com/@banana_dancing_in_rain" target="_blank" rel="noopener noreferrer">@banana_dancing_in_rain</a>)</h3>
             <p>Ghi lại trải nghiệm thực tập quốc tế tại Đài Loan, hậu trường thi đấu Hackathon và chia sẻ năng lượng tích cực cùng kiến thức Cloud-Native, Kubernetes &amp; bảo mật AI/CI-CD.</p>
+            <div class="media-links">
+              <a href="https://www.tiktok.com/@banana_dancing_in_rain/video/7653198068262767879" target="_blank" rel="noopener noreferrer">▶ Video Tiêu biểu #1</a>
+              <a href="https://www.tiktok.com/@banana_dancing_in_rain/photo/7699641199908392200" target="_blank" rel="noopener noreferrer">📸 Bài đăng Tiêu biểu #2</a>
+            </div>
           </div>
         </article>
       </div>

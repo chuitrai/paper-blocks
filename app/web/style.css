@@ -317,10 +317,16 @@ body.scenic-mode .world-veil {
   background: rgba(255, 255, 255, 0.15);
 }
 
-.portrait-svg {
+.portrait-svg,
+.portrait-frame img {
   width: 100%;
   height: 100%;
   display: block;
+}
+
+.portrait-frame img {
+  object-fit: cover;
+  object-position: center top;
 }
 
 .scholar-name {
@@ -547,6 +553,20 @@ body.scenic-mode .world-veil {
   justify-content: center;
   padding: 8px;
   text-align: center;
+  overflow: hidden;
+}
+
+.pub-thumb.has-img {
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.pub-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: 4px;
 }
 
 .pub-thumb-type {
@@ -617,12 +637,25 @@ body.scenic-mode .world-veil {
   border-color: var(--glass-border-strong);
 }
 
-.row-thumb svg {
+.row-thumb svg,
+.row-thumb img {
   width: 100%;
-  height: auto;
+  height: 140px;
   display: block;
   border-radius: 8px;
   border: 1px solid var(--glass-border);
+}
+
+.row-thumb img {
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px;
+}
+
+.row-thumb img.photo {
+  object-fit: cover;
+  padding: 0;
+  background: transparent;
 }
 
 .row-body h3 {
@@ -700,6 +733,37 @@ body.scenic-mode .world-veil {
   width: 100%;
   height: auto;
   display: block;
+}
+
+.media-thumb img {
+  width: 100%;
+  height: 210px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.media-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.media-links a {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.media-links a:hover {
+  background: var(--botanical-soft);
+  border-color: var(--botanical);
 }
 
 .media-badge {
