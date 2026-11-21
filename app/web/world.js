@@ -1,12 +1,14 @@
-// Cảnh nền 3D Minecraft BSL/Complementary Shader (Ảnh chất lượng cao + Hỗ trợ Video Loop)
-// kết hợp Đồ thị Tri thức các Khối Isometric Minecraft tương tác 60fps.
+// Cảnh nền ĐỘNG Thế giới 3D Minecraft BSL/Complementary Shader (60fps Real-Time Living Wallpaper)
+// kết hợp Đồ thị Tri thức các Khối Isometric Minecraft tương tác.
 //
-// - Mặc định tải ảnh nền 3D Shader "./assets/mc-shader-bg.jpg" với hiệu ứng Ken Burns +
-//   Parallax theo thanh cuộn và chuột + lấp lánh mặt nước sông + đom đóm/lá bay.
-// - Nếu người dùng bỏ thêm file "./assets/mc-shader.mp4" (hoặc cài window.MC_BG_VIDEO),
-//   hệ thống tự động phát video loop mượt mà làm nền.
-// - Phía trên cảnh sông 3D là mạng lưới Đồ thị Tri thức (Knowledge Graph) gồm các khối
-//   Minecraft Isometric đại diện cho GraphRAG, EgressGap, Kubernetes, ArgoCD, Helm...
+// Các hiệu ứng chuyển động thời gian thực ngay trên cảnh 3D Minecraft Shader:
+//   1. Dòng sông chảy & gợn sóng khúc xạ thật (Real-time River Water Refraction & Ripples)
+//      từ dưới gầm cầu đá rêu phong xuống tới thảm bèo/lá súng tiền cảnh.
+//   2. Bọt nước & tia nước bắn tung toé dưới chân bánh xe nước gỗ (Waterwheel Splash & Foam).
+//   3. Khói bếp voxel bốc lên và uốn lượn từ ống khói ngôi nhà cổ (Chimney Smoke Puffs).
+//   4. Ánh đèn lồng và cửa sổ nhà cổập bùng ấm áp (Warm Flickering Lanterns & Windows).
+//   5. Tia nắng Volumetric (God Rays) chuyển động nhẹ từ mặt trời góc phải + Lá cây & Đom đóm bay.
+//   6. Camera lướt êm ái (Cinematic Glide + Scroll/Mouse Parallax) & Đồ thị khối Minecraft nổi.
 //
 // Giữ nguyên hợp đồng API: createWorld(canvas) -> { setPapers(list), setPaused(flag), cycleTimeMode() }
 
@@ -21,7 +23,7 @@ export function createWorld(canvas) {
     return { setPapers() {}, setPaused() {}, cycleTimeMode() { return 0; } };
   }
 
-  // ----- Tải ảnh nền 3D Minecraft Shader + Kiểm tra Video nền (nếu có) -----
+  // ----- Tải ảnh nền 3D Minecraft Shader + Hỗ trợ Video nền (nếu có) -----
   const bgImg = new Image();
   let bgImgLoaded = false;
   bgImg.onload = () => {
@@ -29,7 +31,6 @@ export function createWorld(canvas) {
   };
   bgImg.src = "./assets/mc-shader-bg.jpg";
 
-  // Hỗ trợ tự động video loop nếu người dùng đặt URL ở window.MC_BG_VIDEO hoặc data-video trên canvas
   let bgVideo = null;
   let bgVideoReady = false;
   const customVideoUrl = canvas.dataset?.video || window.MC_BG_VIDEO || "";
@@ -50,25 +51,27 @@ export function createWorld(canvas) {
   const THEMES = [
     {
       name: "Ngày Nắng Shader",
-      tintTop: "rgba(10, 22, 40, 0.16)",
-      tintBot: "rgba(8, 18, 32, 0.34)",
-      sunbeam: "rgba(254, 243, 199, 0.11)",
-      waterGlint: "rgba(255, 251, 235, 0.65)",
+      tintTop: "rgba(10, 22, 40, 0.12)",
+      tintBot: "rgba(8, 18, 32, 0.28)",
+      sunbeam: "rgba(254, 243, 199, 0.14)",
+      waterGlint: "rgba(255, 251, 235, 0.72)",
+      lanternGlow: "251, 191, 36",
       fireflyRgb: "254, 240, 138",
       clusters: [
-        { hex: "#34d399", rgb: "52, 211, 153" },  // Graph RAG & AI (Emerald)
-        { hex: "#38bdf8", rgb: "56, 189, 248" },  // Cloud & K8s (Diamond/Beacon)
-        { hex: "#fbbf24", rgb: "251, 191, 36" },  // CI/CD Security (Glowstone/Redstone)
+        { hex: "#34d399", rgb: "52, 211, 153" },
+        { hex: "#38bdf8", rgb: "56, 189, 248" },
+        { hex: "#fbbf24", rgb: "251, 191, 36" },
       ],
       edgeRgb: "226, 232, 240",
       cursorRgb: "254, 240, 138",
     },
     {
       name: "Hoàng Hôn Shader",
-      tintTop: "rgba(67, 20, 48, 0.32)",
-      tintBot: "rgba(28, 16, 38, 0.50)",
-      sunbeam: "rgba(251, 146, 60, 0.16)",
-      waterGlint: "rgba(253, 186, 116, 0.72)",
+      tintTop: "rgba(67, 20, 48, 0.30)",
+      tintBot: "rgba(28, 16, 38, 0.46)",
+      sunbeam: "rgba(251, 146, 60, 0.19)",
+      waterGlint: "rgba(253, 186, 116, 0.78)",
+      lanternGlow: "249, 115, 22",
       fireflyRgb: "251, 191, 36",
       clusters: [
         { hex: "#f59e0b", rgb: "245, 158, 11" },
@@ -80,10 +83,11 @@ export function createWorld(canvas) {
     },
     {
       name: "Đêm Đom Đóm Shader",
-      tintTop: "rgba(3, 10, 28, 0.58)",
-      tintBot: "rgba(4, 12, 30, 0.72)",
-      sunbeam: "rgba(56, 189, 248, 0.08)",
-      waterGlint: "rgba(125, 211, 252, 0.60)",
+      tintTop: "rgba(3, 10, 28, 0.56)",
+      tintBot: "rgba(4, 12, 30, 0.70)",
+      sunbeam: "rgba(56, 189, 248, 0.09)",
+      waterGlint: "rgba(125, 211, 252, 0.65)",
+      lanternGlow: "253, 224, 71",
       fireflyRgb: "110, 231, 183",
       clusters: [
         { hex: "#22d3ee", rgb: "34, 211, 238" },
@@ -263,7 +267,6 @@ export function createWorld(canvas) {
     blockSprites[k] = buildIsometricBlockSprite(k);
   }
 
-  // ----- Danh mục thực thể (Hubs) gắn với từng khối Minecraft -----
   const CORE_CONCEPTS = [
     { label: "GraphRAG", cluster: 0, hub: true, block: "enchant" },
     { label: "LightRAG", cluster: 0, hub: true, block: "emerald" },
@@ -303,11 +306,23 @@ export function createWorld(canvas) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  // ----- Khởi tạo các Khối Block & Đom đóm / Lấp lánh nước sông -----
-  const NODE_COUNT = 28;
+  // ----- Khởi tạo Khối Block, Khói ống khói, Bọt bánh xe nước, Lá bay & Đom đóm -----
+  const NODE_COUNT = 26;
   const nodes = [];
   const fireflies = [];
+  const fallingLeaves = [];
+  const chimneySmoke = [];
+  const wheelSplashes = [];
   const waterSparkles = [];
+
+  // Toạ độ chuẩn hoá (u, v) của các đèn lồng & cửa sổ ấm áp trên ngôi nhà cổ
+  const LANTERN_SPOTS = [
+    { u: 0.149, v: 0.625, r: 28, phase: 0.2 },
+    { u: 0.217, v: 0.627, r: 28, phase: 1.5 },
+    { u: 0.223, v: 0.592, r: 24, phase: 2.8 },
+    { u: 0.296, v: 0.572, r: 34, phase: 0.9 },
+    { u: 0.365, v: 0.565, r: 30, phase: 2.1 },
+  ];
 
   function initEntities() {
     nodes.length = 0;
@@ -338,26 +353,60 @@ export function createWorld(canvas) {
     }
 
     fireflies.length = 0;
-    for (let i = 0; i < 26; i++) {
+    for (let i = 0; i < 24; i++) {
       fireflies.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.35,
-        vy: -0.15 - Math.random() * 0.25,
-        size: 2 + (i % 3),
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: -0.18 - Math.random() * 0.25,
+        size: 2.2 + (i % 3),
         phase: Math.random() * Math.PI * 2,
       });
     }
 
-    waterSparkles.length = 0;
-    for (let i = 0; i < 22; i++) {
-      waterSparkles.push({
-        // Tập trung ở vùng dòng sông giữa-dưới bức ảnh
-        u: 0.34 + Math.random() * 0.38,
-        v: 0.58 + Math.random() * 0.38,
-        w: 6 + Math.random() * 14,
+    fallingLeaves.length = 0;
+    const leafColors = ["#84cc16", "#65a30d", "#f59e0b", "#fb7185", "#fde047"];
+    for (let i = 0; i < 18; i++) {
+      fallingLeaves.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: 0.45 + Math.random() * 0.55,
+        vy: 0.35 + Math.random() * 0.45,
+        size: 3 + (i % 3),
+        color: leafColors[i % leafColors.length],
         phase: Math.random() * Math.PI * 2,
-        speed: 1.8 + Math.random() * 2.2,
+      });
+    }
+
+    chimneySmoke.length = 0;
+    for (let i = 0; i < 14; i++) {
+      chimneySmoke.push({
+        age: i / 14,
+        seed: i * 1.37,
+      });
+    }
+
+    wheelSplashes.length = 0;
+    for (let i = 0; i < 16; i++) {
+      wheelSplashes.push({
+        age: i / 16,
+        offsetX: (Math.random() - 0.5) * 0.032,
+        speed: 0.6 + Math.random() * 0.5,
+      });
+    }
+
+    waterSparkles.length = 0;
+    for (let i = 0; i < 32; i++) {
+      const v = 0.58 + Math.random() * 0.40;
+      // Theo sát lòng sông từ cầu đá (v=0.58) xuống tiền cảnh (v=0.98)
+      const riverCenterU = 0.61 - (v - 0.58) * 0.16;
+      const halfWidthU = 0.06 + (v - 0.58) * 0.36;
+      waterSparkles.push({
+        u: riverCenterU + (Math.random() - 0.5) * 2 * halfWidthU,
+        v,
+        w: 8 + Math.random() * 18,
+        phase: Math.random() * Math.PI * 2,
+        speed: 2.2 + Math.random() * 2.5,
       });
     }
   }
@@ -435,15 +484,17 @@ export function createWorld(canvas) {
     { passive: true }
   );
 
-  // ----- Vẽ lớp nền Thế giới 3D Minecraft Shader (Ảnh hoặc Video) kèm Parallax -----
-  function drawMinecraftShaderWorld(theme, t, scrollOffset) {
+  // =========================================================================
+  // VẼ THẾ GIỚI 3D MINECRAFT ĐỘNG (NƯỚC CHẢY, KHÓI BẾP, BÁNH XE NƯỚC, ĐÈN LỒNG)
+  // =========================================================================
+  function drawAnimatedMinecraftWorld(theme, t, dt, scrollOffset) {
     const media = bgVideoReady ? bgVideo : bgImgLoaded ? bgImg : null;
     const mediaW = bgVideoReady ? bgVideo.videoWidth || 1920 : bgImg.naturalWidth || 1920;
     const mediaH = bgVideoReady ? bgVideo.videoHeight || 1080 : bgImg.naturalHeight || 1080;
 
     if (media) {
-      // Phóng nhẹ 1.09x để có biên độ trượt Parallax khi cuộn trang & di chuột
-      const zoom = 1.09 + Math.sin(t * 0.18) * 0.015;
+      // Camera thở & lướt nhẹ tự động ngay cả khi không di chuột
+      const zoom = 1.11 + Math.sin(t * 0.28) * 0.022;
       const coverScale = Math.max(width / mediaW, height / mediaH) * zoom;
       const drawW = mediaW * coverScale;
       const drawH = mediaH * coverScale;
@@ -451,31 +502,123 @@ export function createWorld(canvas) {
       const maxPanX = (drawW - width) * 0.5;
       const maxPanY = (drawH - height) * 0.5;
 
+      const autoPanX = Math.sin(t * 0.22) * Math.min(22, maxPanX * 0.45);
+      const autoPanY = Math.cos(t * 0.17) * Math.min(12, maxPanY * 0.30);
+
       const mouseNormX = pointer.active ? (pointer.x / Math.max(1, width) - 0.5) * 2 : 0;
       const mouseNormY = pointer.active ? (pointer.y / Math.max(1, height) - 0.5) * 2 : 0;
       const scrollNorm = Math.min(1, Math.max(-1, (scrollOffset % 2400) / 1200 - 0.5));
 
-      const panX = -mouseNormX * Math.min(28, maxPanX * 0.65);
-      const panY = -scrollNorm * Math.min(42, maxPanY * 0.75) - mouseNormY * Math.min(14, maxPanY * 0.25);
+      const panX = autoPanX - mouseNormX * Math.min(26, maxPanX * 0.55);
+      const panY = autoPanY - scrollNorm * Math.min(44, maxPanY * 0.72) - mouseNormY * Math.min(14, maxPanY * 0.25);
 
       const dx = (width - drawW) * 0.5 + panX;
       const dy = (height - drawH) * 0.5 + panY;
 
+      // 1. Vẽ toàn cảnh bức ảnh 3D Minecraft Shader gốc
       ctx.drawImage(media, dx, dy, drawW, drawH);
 
-      // Lấp lánh nắng phản chiếu trên mặt nước sông (Animated Shader Water Glints)
+      // 2. HIỆU ỨNG NƯỚC SÔNG CHẢY & GỢN SÓNG KHÚC XẠ THỜI GIAN THỰC (River Water Refraction)
+      if (!noMotion && !bgVideoReady) {
+        ctx.save();
+        // Khoanh vùng đa giác lòng sông (từ gầm cầu đá v=0.57 xuống tiền cảnh v=1.0)
+        ctx.beginPath();
+        ctx.moveTo(dx + 0.57 * drawW, dy + 0.575 * drawH);
+        ctx.lineTo(dx + 0.68 * drawW, dy + 0.575 * drawH);
+        ctx.lineTo(dx + 0.73 * drawW, dy + 0.76 * drawH);
+        ctx.lineTo(dx + 0.78 * drawW, dy + 1.0 * drawH);
+        ctx.lineTo(dx + 0.31 * drawW, dy + 1.0 * drawH);
+        ctx.lineTo(dx + 0.40 * drawW, dy + 0.73 * drawH);
+        ctx.lineTo(dx + 0.53 * drawW, dy + 0.63 * drawH);
+        ctx.closePath();
+        ctx.clip();
+
+        const STRIPS = 34;
+        const vStart = 0.575;
+        const vEnd = 1.0;
+        const vStep = (vEnd - vStart) / STRIPS;
+
+        for (let i = 0; i < STRIPS; i++) {
+          const v0 = vStart + i * vStep;
+          const depthFactor = (v0 - vStart) / (vEnd - vStart); // gần camera sóng lớn hơn
+          // Sóng chảy hướng về phía người xem (t * 3.6 - i * 0.55)
+          const waveX = Math.sin(t * 3.6 - i * 0.58) * (1.8 + depthFactor * 5.2);
+          const waveY = Math.cos(t * 2.8 - i * 0.45) * (0.4 + depthFactor * 1.4);
+
+          const sy = v0 * mediaH;
+          const sh = Math.ceil(vStep * mediaH) + 2;
+          const targetY = dy + v0 * drawH;
+          const targetH = Math.ceil(vStep * drawH) + 2;
+
+          ctx.drawImage(media, 0, sy, mediaW, sh, dx + waveX, targetY + waveY, drawW, targetH);
+        }
+        ctx.restore();
+      }
+
+      // 3. BỌT NƯỚC & TIA NƯỚC BẮN DƯỚI BÁNH XE NƯỚC GỖ (Waterwheel Splash)
+      const wheelX = dx + 0.402 * drawW;
+      const wheelBaseY = dy + 0.728 * drawH;
+      for (const sp of wheelSplashes) {
+        if (!noMotion) {
+          sp.age = (sp.age + dt * sp.speed) % 1;
+        }
+        const sx = wheelX + sp.offsetX * drawW + Math.sin(t * 4 + sp.age * 6) * 5;
+        const sy = wheelBaseY - Math.sin(sp.age * Math.PI) * 11 + sp.age * 8;
+        const alpha = (1 - sp.age) * 0.75;
+        const sz = 2.5 + (1 - sp.age) * 3;
+        ctx.fillStyle = `rgba(240, 249, 255, ${alpha.toFixed(3)})`;
+        ctx.fillRect(sx, sy, sz, sz);
+      }
+
+      // 4. KHÓI BẾP VOXEL BỐC LÊN TỪ ỐNG KHÓI NHÀ CỔ (Chimney Smoke Puffs)
+      const chimX = dx + 0.300 * drawW;
+      const chimY = dy + 0.332 * drawH;
+      for (const sm of chimneySmoke) {
+        if (!noMotion) {
+          sm.age = (sm.age + dt * 0.22) % 1;
+        }
+        const rise = sm.age * 78;
+        const sway = Math.sin(t * 1.4 + sm.seed + sm.age * 4.5) * (6 + sm.age * 18) + sm.age * 14;
+        const sz = 6 + sm.age * 16;
+        const alpha = Math.sin(sm.age * Math.PI) * 0.34;
+        ctx.fillStyle = `rgba(241, 245, 249, ${alpha.toFixed(3)})`;
+        ctx.fillRect(chimX + sway - sz * 0.5, chimY - rise - sz * 0.5, sz, sz);
+      }
+
+      // 5. ÁNH ĐÈN LỒNG & CỬA SỔ NHÀ CỔ BẬP BÙNG ẤM ÁP (Flickering Lanterns)
+      for (const lt of LANTERN_SPOTS) {
+        const lx = dx + lt.u * drawW;
+        const ly = dy + lt.v * drawH;
+        const flicker = 0.75 + Math.sin(t * 6.5 + lt.phase) * 0.15 + Math.cos(t * 11.2 + lt.phase) * 0.10;
+        const rad = lt.r * (0.9 + flicker * 0.25);
+        const lGrad = ctx.createRadialGradient(lx, ly, 2, lx, ly, rad);
+        lGrad.addColorStop(0, `rgba(${theme.lanternGlow}, ${(0.42 * flicker).toFixed(3)})`);
+        lGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = lGrad;
+        ctx.beginPath();
+        ctx.arc(lx, ly, rad, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 6. VỆT NẮNG LẤP LÁNH TRÔI TRÊN DÒNG SÔNG (Flowing River Sun Glints)
       ctx.fillStyle = theme.waterGlint;
       for (const sp of waterSparkles) {
+        if (!noMotion) {
+          // Trôi nhẹ dọc theo dòng chảy về phía tiền cảnh
+          sp.v += dt * 0.022;
+          if (sp.v > 0.98) {
+            sp.v = 0.58;
+          }
+        }
         const pulse = Math.sin(t * sp.speed + sp.phase);
-        if (pulse > 0.15) {
-          const sx = dx + sp.u * drawW + Math.sin(t * 1.3 + sp.phase) * 6;
+        if (pulse > 0.05) {
+          const sx = dx + sp.u * drawW + Math.sin(t * 2.5 + sp.phase) * 8;
           const sy = dy + sp.v * drawH;
-          const sw = sp.w * (pulse - 0.15);
-          ctx.fillRect(sx - sw * 0.5, sy, sw, 2);
+          const sw = sp.w * pulse;
+          ctx.fillRect(sx - sw * 0.5, sy, sw, 2.2);
         }
       }
     } else {
-      // Fallback màu nền trong vài mili-giây đầu khi ảnh đang nạp
       const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
       bgGrad.addColorStop(0, "#0c192c");
       bgGrad.addColorStop(1, "#112233");
@@ -483,31 +626,51 @@ export function createWorld(canvas) {
       ctx.fillRect(0, 0, width, height);
     }
 
-    // Lớp phủ ánh sáng khí quyển theo thời gian (Ngày / Hoàng hôn / Đêm)
+    // 7. Lớp phủ khí quyển Ngày / Hoàng hôn / Đêm
     const tintGrad = ctx.createLinearGradient(0, 0, 0, height);
     tintGrad.addColorStop(0, theme.tintTop);
     tintGrad.addColorStop(1, theme.tintBot);
     ctx.fillStyle = tintGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // Tia nắng Volumetric (God Rays) từ góc trên bên phải
-    const sunGrad = ctx.createRadialGradient(width * 0.88, height * 0.12, 10, width * 0.88, height * 0.12, Math.max(width, height) * 0.75);
+    // 8. Tia nắng Volumetric (Breathing Sunbeams)
+    const sunPulse = 0.85 + Math.sin(t * 0.9) * 0.15;
+    const sunGrad = ctx.createRadialGradient(
+      width * 0.90,
+      height * 0.10,
+      10,
+      width * 0.90,
+      height * 0.10,
+      Math.max(width, height) * 0.78 * sunPulse
+    );
     sunGrad.addColorStop(0, theme.sunbeam);
     sunGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
     ctx.fillStyle = sunGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // Hạt đom đóm / phấn hoa vuông kiểu Minecraft bay lơ lửng trong thung lũng
+    // 9. Lá cây Voxel bay theo gió qua thung lũng
+    for (const lf of fallingLeaves) {
+      if (!noMotion) {
+        lf.x += lf.vx + Math.sin(t * 1.6 + lf.phase) * 0.35;
+        lf.y += lf.vy + Math.cos(t * 1.2 + lf.phase) * 0.18;
+        if (lf.x > width + 15) lf.x = -15;
+        if (lf.y > height + 15) lf.y = -15;
+      }
+      ctx.fillStyle = lf.color;
+      ctx.fillRect(lf.x, lf.y, lf.size, lf.size);
+    }
+
+    // 10. Đom đóm lấp lánh bay lên từ mặt sông và bờ cỏ
     for (const f of fireflies) {
       if (!noMotion) {
-        f.x += f.vx + Math.sin(t * 1.1 + f.phase) * 0.18;
+        f.x += f.vx + Math.sin(t * 1.3 + f.phase) * 0.22;
         f.y += f.vy;
         if (f.y < -10) f.y = height + 10;
         if (f.x < -10) f.x = width + 10;
         else if (f.x > width + 10) f.x = -10;
       }
-      const glowAlpha = 0.35 + Math.sin(t * 2.6 + f.phase) * 0.30;
-      ctx.fillStyle = `rgba(${theme.fireflyRgb}, ${Math.max(0.08, glowAlpha).toFixed(3)})`;
+      const glowAlpha = 0.42 + Math.sin(t * 3.0 + f.phase) * 0.35;
+      ctx.fillStyle = `rgba(${theme.fireflyRgb}, ${Math.max(0.1, glowAlpha).toFixed(3)})`;
       ctx.fillRect(f.x, f.y, f.size, f.size);
     }
   }
@@ -523,8 +686,8 @@ export function createWorld(canvas) {
     smoothScrollY += (targetScrollY - smoothScrollY) * Math.min(1, dt * 10);
     const theme = THEMES[timeMode];
 
-    // 1. Vẽ cảnh nền Thế giới 3D Minecraft Shader + Mặt nước lấp lánh + Đom đóm
-    drawMinecraftShaderWorld(theme, t, smoothScrollY);
+    // 1. Vẽ Thế giới 3D Minecraft ĐỘNG (Nước sông chảy, khói bếp, bánh xe nước, đèn lồng, lá bay)
+    drawAnimatedMinecraftWorld(theme, t, dt, smoothScrollY);
 
     // 2. Cập nhật vị trí các Khối Block trên Đồ thị Tri thức
     const linkDist = Math.min(width, height) < 640 ? 145 : 195;
