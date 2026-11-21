@@ -582,24 +582,24 @@ window.addEventListener("session-changed", async () => {
   toast("Phiên đã hết hạn, hãy đăng nhập lại", true);
 });
 
-// Nút đổi bầu trời 3D Ngày / Hoàng hôn / Đêm
+// Nút đổi giao diện nền Đồ thị Tri thức (Research Slate / Twilight / Cyber Midnight)
 $("btn-time")?.addEventListener("click", () => {
   if (!world?.cycleTimeMode) return;
   const mode = world.cycleTimeMode();
-  const labels = ["🌤️ Bầu trời: Ngày", "🌇 Bầu trời: Chiều", "🌙 Bầu trời: Đêm"];
-  $("btn-time").textContent = labels[mode] || "🌤️ Bầu trời";
+  const labels = ["🌌 Nền: Research Slate", "🌇 Nền: Twilight", "🌙 Nền: Cyber Matrix"];
+  $("btn-time").textContent = labels[mode] || "🌌 Đổi nền";
 });
 
-// Nút Ngắm cảnh nền 3D
+// Nút Ngắm Đồ thị Tri thức Tương tác
 function toggleScenicMode(force) {
   const isScenic = typeof force === "boolean" ? force : !document.body.classList.contains("scenic-mode");
   document.body.classList.toggle("scenic-mode", isScenic);
   const btn = $("btn-scenic");
   if (btn) {
-    btn.textContent = isScenic ? "📋 Hiện Portfolio" : "🖼️ Ngắm nền 3D";
+    btn.textContent = isScenic ? "📋 Hiện Portfolio" : "🕸️ Ngắm Đồ thị";
   }
   if (isScenic) {
-    toast("Đang ẩn tạm bảng thông tin để ngắm dòng sông 3D (Bấm Esc hoặc nút trên thanh menu để hiện lại)");
+    toast("Di chuột hoặc click để tương tác với Đồ thị Tri thức (Bấm Esc hoặc nút trên menu để hiện lại)");
   }
 }
 
