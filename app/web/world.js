@@ -1,6 +1,12 @@
-// Cảnh nền Khoa học Tương tác x Minecraft Isometric Blocks (Canvas 2D 60fps):
-// Kết hợp Đồ thị Tri thức (Knowledge Graph & Cloud Topology) với các khối Isometric Minecraft
-// được pre-render sắc nét trên Offscreen Canvas (0.2ms/frame, mượt 60-120fps trên mọi thiết bị).
+// Cảnh nền 3D Minecraft BSL/Complementary Shader (Ảnh chất lượng cao + Hỗ trợ Video Loop)
+// kết hợp Đồ thị Tri thức các Khối Isometric Minecraft tương tác 60fps.
+//
+// - Mặc định tải ảnh nền 3D Shader "./assets/mc-shader-bg.jpg" với hiệu ứng Ken Burns +
+//   Parallax theo thanh cuộn và chuột + lấp lánh mặt nước sông + đom đóm/lá bay.
+// - Nếu người dùng bỏ thêm file "./assets/mc-shader.mp4" (hoặc cài window.MC_BG_VIDEO),
+//   hệ thống tự động phát video loop mượt mà làm nền.
+// - Phía trên cảnh sông 3D là mạng lưới Đồ thị Tri thức (Knowledge Graph) gồm các khối
+//   Minecraft Isometric đại diện cho GraphRAG, EgressGap, Kubernetes, ArgoCD, Helm...
 //
 // Giữ nguyên hợp đồng API: createWorld(canvas) -> { setPapers(list), setPaused(flag), cycleTimeMode() }
 
@@ -15,64 +21,77 @@ export function createWorld(canvas) {
     return { setPapers() {}, setPaused() {}, cycleTimeMode() { return 0; } };
   }
 
-  // ----- 3 chế độ màu sắc không gian -----
+  // ----- Tải ảnh nền 3D Minecraft Shader + Kiểm tra Video nền (nếu có) -----
+  const bgImg = new Image();
+  let bgImgLoaded = false;
+  bgImg.onload = () => {
+    bgImgLoaded = true;
+  };
+  bgImg.src = "./assets/mc-shader-bg.jpg";
+
+  // Hỗ trợ tự động video loop nếu người dùng đặt URL ở window.MC_BG_VIDEO hoặc data-video trên canvas
+  let bgVideo = null;
+  let bgVideoReady = false;
+  const customVideoUrl = canvas.dataset?.video || window.MC_BG_VIDEO || "";
+  if (customVideoUrl) {
+    bgVideo = document.createElement("video");
+    bgVideo.src = customVideoUrl;
+    bgVideo.muted = true;
+    bgVideo.loop = true;
+    bgVideo.playsInline = true;
+    bgVideo.autoplay = true;
+    bgVideo.addEventListener("canplay", () => {
+      bgVideoReady = true;
+      bgVideo.play().catch(() => {});
+    });
+  }
+
+  // ----- 3 chế độ ánh sáng Shader (Ngày nắng / Hoàng hôn / Đêm đom đóm) -----
   const THEMES = [
     {
-      name: "Research Slate",
-      bgTop: "#06101e",
-      bgMid: "#0b1a2e",
-      bgBot: "#0f233c",
-      gridDot: "rgba(148, 163, 184, 0.13)",
-      aurora: [
-        { color: "rgba(16, 185, 129, 0.13)", yFrac: 0.24, amp: 48, speed: 0.42 },
-        { color: "rgba(56, 189, 248, 0.14)", yFrac: 0.52, amp: 62, speed: -0.35 },
-        { color: "rgba(99, 102, 241, 0.11)", yFrac: 0.78, amp: 52, speed: 0.28 },
-      ],
+      name: "Ngày Nắng Shader",
+      tintTop: "rgba(10, 22, 40, 0.16)",
+      tintBot: "rgba(8, 18, 32, 0.34)",
+      sunbeam: "rgba(254, 243, 199, 0.11)",
+      waterGlint: "rgba(255, 251, 235, 0.65)",
+      fireflyRgb: "254, 240, 138",
       clusters: [
         { hex: "#34d399", rgb: "52, 211, 153" },  // Graph RAG & AI (Emerald)
         { hex: "#38bdf8", rgb: "56, 189, 248" },  // Cloud & K8s (Diamond/Beacon)
         { hex: "#fbbf24", rgb: "251, 191, 36" },  // CI/CD Security (Glowstone/Redstone)
       ],
-      edgeRgb: "148, 163, 184",
-      cursorRgb: "56, 189, 248",
+      edgeRgb: "226, 232, 240",
+      cursorRgb: "254, 240, 138",
     },
     {
-      name: "Twilight Horizon",
-      bgTop: "#110d20",
-      bgMid: "#1c1430",
-      bgBot: "#271a38",
-      gridDot: "rgba(216, 180, 254, 0.12)",
-      aurora: [
-        { color: "rgba(245, 158, 11, 0.14)", yFrac: 0.26, amp: 52, speed: 0.38 },
-        { color: "rgba(244, 63, 94, 0.12)", yFrac: 0.54, amp: 58, speed: -0.32 },
-        { color: "rgba(168, 85, 247, 0.14)", yFrac: 0.80, amp: 46, speed: 0.30 },
-      ],
+      name: "Hoàng Hôn Shader",
+      tintTop: "rgba(67, 20, 48, 0.32)",
+      tintBot: "rgba(28, 16, 38, 0.50)",
+      sunbeam: "rgba(251, 146, 60, 0.16)",
+      waterGlint: "rgba(253, 186, 116, 0.72)",
+      fireflyRgb: "251, 191, 36",
       clusters: [
         { hex: "#f59e0b", rgb: "245, 158, 11" },
         { hex: "#c084fc", rgb: "192, 132, 252" },
         { hex: "#fb7185", rgb: "251, 113, 133" },
       ],
-      edgeRgb: "203, 213, 225",
-      cursorRgb: "245, 158, 11",
+      edgeRgb: "254, 215, 170",
+      cursorRgb: "251, 146, 60",
     },
     {
-      name: "Cyber Midnight",
-      bgTop: "#030711",
-      bgMid: "#060e1d",
-      bgBot: "#091528",
-      gridDot: "rgba(56, 189, 248, 0.12)",
-      aurora: [
-        { color: "rgba(34, 211, 238, 0.14)", yFrac: 0.22, amp: 55, speed: 0.45 },
-        { color: "rgba(16, 185, 129, 0.13)", yFrac: 0.50, amp: 64, speed: -0.36 },
-        { color: "rgba(59, 130, 246, 0.12)", yFrac: 0.78, amp: 50, speed: 0.31 },
-      ],
+      name: "Đêm Đom Đóm Shader",
+      tintTop: "rgba(3, 10, 28, 0.58)",
+      tintBot: "rgba(4, 12, 30, 0.72)",
+      sunbeam: "rgba(56, 189, 248, 0.08)",
+      waterGlint: "rgba(125, 211, 252, 0.60)",
+      fireflyRgb: "110, 231, 183",
       clusters: [
         { hex: "#22d3ee", rgb: "34, 211, 238" },
         { hex: "#10b981", rgb: "16, 185, 129" },
         { hex: "#818cf8", rgb: "129, 140, 248" },
       ],
-      edgeRgb: "100, 116, 139",
-      cursorRgb: "34, 211, 238",
+      edgeRgb: "148, 163, 184",
+      cursorRgb: "52, 211, 153",
     },
   ];
 
@@ -89,65 +108,63 @@ export function createWorld(canvas) {
     return `rgb(${r},${g},${b})`;
   }
 
-  // Hàm băm tất định cho pixel noise
   function pHash(x, y, seed) {
     const h = Math.sin(x * 127.1 + y * 311.7 + seed * 74.7) * 43758.5453;
     return h - Math.floor(h);
   }
 
-  // Định nghĩa 12 loại khối Minecraft đặc trưng
   const BLOCK_DEFS = {
     grass: {
       top: (u, v, r) => (r > 0.65 ? "#65a30d" : r < 0.25 ? "#4d7c0f" : "#579211"),
-      side: (u, v, r) => (v < 2 || (v === 2 && (u % 2 === 0)) ? "#579211" : r > 0.6 ? "#854d0e" : r < 0.25 ? "#5c3409" : "#713f12"),
+      side: (u, v, r) => (v < 2 || (v === 2 && u % 2 === 0) ? "#579211" : r > 0.6 ? "#854d0e" : r < 0.25 ? "#5c3409" : "#713f12"),
     },
     bookshelf: {
       top: (u, v, r) => (r > 0.5 ? "#b45309" : "#92400e"),
-      side: (u, v, r) => {
+      side: (u, v) => {
         if (v === 0 || v === 3 || v === 4 || v === 7) return "#92400e";
         const bookColors = ["#dc2626", "#2563eb", "#16a34a", "#d97706", "#9333ea", "#0891b2"];
         return bookColors[(u + v * 3) % bookColors.length];
       },
     },
     enchant: {
-      top: (u, v) => ((u === 0 || u === 7 || v === 0 || v === 7) ? "#38bdf8" : (u + v) % 2 === 0 ? "#dc2626" : "#991b1b"),
+      top: (u, v) => (u === 0 || u === 7 || v === 0 || v === 7 ? "#38bdf8" : (u + v) % 2 === 0 ? "#dc2626" : "#991b1b"),
       side: (u, v, r) => (v < 2 ? "#dc2626" : (u === 1 || u === 6) && v < 5 ? "#38bdf8" : r > 0.5 ? "#1e1b4b" : "#0f172a"),
     },
     emerald: {
-      top: (u, v, r) => ((u === 0 || u === 7 || v === 0 || v === 7) ? "#059669" : (u >= 2 && u <= 5 && v >= 2 && v <= 5) ? "#6ee7b7" : r > 0.5 ? "#10b981" : "#34d399"),
-      side: (u, v, r) => ((u === 0 || u === 7 || v === 0 || v === 7) ? "#059669" : r > 0.5 ? "#10b981" : "#34d399"),
+      top: (u, v, r) => (u === 0 || u === 7 || v === 0 || v === 7 ? "#059669" : u >= 2 && u <= 5 && v >= 2 && v <= 5 ? "#6ee7b7" : r > 0.5 ? "#10b981" : "#34d399"),
+      side: (u, v, r) => (u === 0 || u === 7 || v === 0 || v === 7 ? "#059669" : r > 0.5 ? "#10b981" : "#34d399"),
     },
     diamond: {
-      top: (u, v, r) => ((u === 0 || u === 7 || v === 0 || v === 7) ? "#0284c7" : (u >= 2 && u <= 5 && v >= 2 && v <= 5) ? "#bae6fd" : r > 0.5 ? "#38bdf8" : "#0ea5e9"),
-      side: (u, v, r) => ((u === 0 || u === 7 || v === 0 || v === 7) ? "#0284c7" : r > 0.5 ? "#38bdf8" : "#7dd3fc"),
+      top: (u, v, r) => (u === 0 || u === 7 || v === 0 || v === 7 ? "#0284c7" : u >= 2 && u <= 5 && v >= 2 && v <= 5 ? "#bae6fd" : r > 0.5 ? "#38bdf8" : "#0ea5e9"),
+      side: (u, v, r) => (u === 0 || u === 7 || v === 0 || v === 7 ? "#0284c7" : r > 0.5 ? "#38bdf8" : "#7dd3fc"),
     },
     beacon: {
-      top: (u, v) => ((u === 0 || u === 7 || v === 0 || v === 7) ? "#0284c7" : "#e0f2fe"),
-      side: (u, v) => (v >= 6 ? "#1e1b4b" : (u === 0 || u === 7 || v === 0) ? "#0ea5e9" : (u >= 2 && u <= 5 && v >= 2 && v <= 4) ? "#fef08a" : "#7dd3fc"),
+      top: (u, v) => (u === 0 || u === 7 || v === 0 || v === 7 ? "#0284c7" : "#e0f2fe"),
+      side: (u, v) => (v >= 6 ? "#1e1b4b" : u === 0 || u === 7 || v === 0 ? "#0ea5e9" : u >= 2 && u <= 5 && v >= 2 && v <= 4 ? "#fef08a" : "#7dd3fc"),
     },
     glowstone: {
       top: (u, v, r) => (r > 0.72 ? "#fef08a" : r > 0.4 ? "#f59e0b" : r > 0.18 ? "#d97706" : "#78350f"),
       side: (u, v, r) => (r > 0.72 ? "#fef08a" : r > 0.4 ? "#f59e0b" : r > 0.18 ? "#d97706" : "#78350f"),
     },
     redstone_lamp: {
-      top: (u, v) => ((u === 0 || u === 7 || v === 0 || v === 7 || u === v) ? "#451a03" : (u >= 2 && u <= 5 && v >= 2 && v <= 5) ? "#fde047" : "#f97316"),
-      side: (u, v) => ((u === 0 || u === 7 || v === 0 || v === 7) ? "#451a03" : (u >= 2 && u <= 5 && v >= 2 && v <= 5) ? "#fef08a" : "#ea580c"),
+      top: (u, v) => (u === 0 || u === 7 || v === 0 || v === 7 || u === v ? "#451a03" : u >= 2 && u <= 5 && v >= 2 && v <= 5 ? "#fde047" : "#f97316"),
+      side: (u, v) => (u === 0 || u === 7 || v === 0 || v === 7 ? "#451a03" : u >= 2 && u <= 5 && v >= 2 && v <= 5 ? "#fef08a" : "#ea580c"),
     },
     amethyst: {
       top: (u, v, r) => (r > 0.7 ? "#e9d5ff" : r > 0.35 ? "#a855f7" : "#7e22ce"),
       side: (u, v, r) => (r > 0.7 ? "#d8b4fe" : r > 0.35 ? "#9333ea" : "#6b21a8"),
     },
     crafting: {
-      top: (u, v) => ((u === 0 || u === 7 || v === 0 || v === 7) ? "#78350f" : (u % 2 === 0 || v % 2 === 0) ? "#b45309" : "#d97706"),
+      top: (u, v) => (u === 0 || u === 7 || v === 0 || v === 7 ? "#78350f" : u % 2 === 0 || v % 2 === 0 ? "#b45309" : "#d97706"),
       side: (u, v, r) => (v < 2 ? "#78350f" : (u === 2 || u === 5) && v > 2 ? "#475569" : r > 0.5 ? "#b45309" : "#92400e"),
     },
     command: {
-      top: (u, v) => ((u === 0 || u === 7 || v === 0 || v === 7) ? "#475569" : (u >= 3 && u <= 4 && v >= 3 && v <= 4) ? "#38bdf8" : "#c27849"),
-      side: (u, v) => ((u === 0 || u === 7 || v === 0 || v === 7) ? "#334155" : (u >= 2 && u <= 5 && v >= 2 && v <= 5) ? ((u + v) % 2 === 0 ? "#34d399" : "#fbbf24") : "#a3623a"),
+      top: (u, v) => (u === 0 || u === 7 || v === 0 || v === 7 ? "#475569" : u >= 3 && u <= 4 && v >= 3 && v <= 4 ? "#38bdf8" : "#c27849"),
+      side: (u, v) => (u === 0 || u === 7 || v === 0 || v === 7 ? "#334155" : u >= 2 && u <= 5 && v >= 2 && v <= 5 ? ((u + v) % 2 === 0 ? "#34d399" : "#fbbf24") : "#a3623a"),
     },
     chest: {
-      top: (u, v) => ((u === 0 || u === 7 || v === 0 || v === 7) ? "#451a03" : "#d97706"),
-      side: (u, v) => (v === 3 ? "#1e293b" : (u >= 3 && u <= 4 && v >= 2 && v <= 4) ? "#facc15" : (u === 0 || u === 7 || v === 0 || v === 7) ? "#78350f" : "#b45309"),
+      top: (u, v) => (u === 0 || u === 7 || v === 0 || v === 7 ? "#451a03" : "#d97706"),
+      side: (u, v) => (v === 3 ? "#1e293b" : u >= 3 && u <= 4 && v >= 2 && v <= 4 ? "#facc15" : u === 0 || u === 7 || v === 0 || v === 7 ? "#78350f" : "#b45309"),
     },
   };
 
@@ -163,9 +180,9 @@ export function createWorld(canvas) {
     const c = off.getContext("2d");
 
     const N = 8;
-    const stepX = 3.2;   // bề ngang nửa viên gạch isometric
-    const stepY = 1.6;   // độ dốc nửa viên gạch isometric
-    const stepZ = 3.3;   // chiều cao 1 tầng pixel
+    const stepX = 3.2;
+    const stepY = 1.6;
+    const stepZ = 3.3;
     const cx = size / 2;
     const cy = 11;
 
@@ -185,7 +202,6 @@ export function createWorld(canvas) {
       c.fill();
     };
 
-    // 1. Mặt Trên (Top Face: w = 0)
     for (let u = 0; u < N; u++) {
       for (let v = 0; v < N; v++) {
         const r = pHash(u, v, 1);
@@ -194,7 +210,6 @@ export function createWorld(canvas) {
       }
     }
 
-    // 2. Mặt Trái (Left Face: u = N, v = 0..N-1, w = 0..N-1)
     for (let v = 0; v < N; v++) {
       for (let w = 0; w < N; w++) {
         const r = pHash(v, w, 2);
@@ -203,7 +218,6 @@ export function createWorld(canvas) {
       }
     }
 
-    // 3. Mặt Phải (Right Face: v = N, u = 0..N-1, w = 0..N-1)
     for (let u = 0; u < N; u++) {
       for (let w = 0; w < N; w++) {
         const r = pHash(u, w, 3);
@@ -212,7 +226,6 @@ export function createWorld(canvas) {
       }
     }
 
-    // 4. Viền cạnh sắc nét (Voxel Edge Highlight & Outline)
     const pTop = iso(0, 0, 0);
     const pRight = iso(N, 0, 0);
     const pCenter = iso(N, N, 0);
@@ -221,8 +234,7 @@ export function createWorld(canvas) {
     const pBotCenter = iso(N, N, N);
     const pBotLeft = iso(0, N, N);
 
-    // Viền ngoài tối
-    c.strokeStyle = "rgba(2, 6, 23, 0.78)";
+    c.strokeStyle = "rgba(2, 6, 23, 0.82)";
     c.lineWidth = 1.4;
     c.beginPath();
     c.moveTo(pTop.x, pTop.y);
@@ -234,7 +246,6 @@ export function createWorld(canvas) {
     c.closePath();
     c.stroke();
 
-    // Đường sống sáng giữa 3 mặt (Inner Voxel Crease)
     c.strokeStyle = "rgba(255, 255, 255, 0.35)";
     c.lineWidth = 1.1;
     c.beginPath();
@@ -254,7 +265,6 @@ export function createWorld(canvas) {
 
   // ----- Danh mục thực thể (Hubs) gắn với từng khối Minecraft -----
   const CORE_CONCEPTS = [
-    // Cluster 0: Graph RAG & AI Research
     { label: "GraphRAG", cluster: 0, hub: true, block: "enchant" },
     { label: "LightRAG", cluster: 0, hub: true, block: "emerald" },
     { label: "P2q Filter", cluster: 0, hub: true, block: "bookshelf" },
@@ -262,26 +272,21 @@ export function createWorld(canvas) {
     { label: "ACIIDS '27", cluster: 0, hub: true, block: "emerald" },
     { label: "FAISS · TransNet", cluster: 0, hub: false, block: "bookshelf" },
     { label: "PII Privacy", cluster: 0, hub: false, block: "amethyst" },
-    { label: "Knowledge Graph", cluster: 0, hub: false, block: "enchant" },
 
-    // Cluster 1: Cloud-Native & Kubernetes
     { label: "Kubernetes", cluster: 1, hub: true, block: "beacon" },
     { label: "ArgoCD GitOps", cluster: 1, hub: true, block: "diamond" },
     { label: "Helm Chart", cluster: 1, hub: true, block: "crafting" },
     { label: "Go 1.24 API", cluster: 1, hub: true, block: "command" },
     { label: "Prometheus · EFK", cluster: 1, hub: false, block: "beacon" },
     { label: "AWS · GCP", cluster: 1, hub: false, block: "diamond" },
-    { label: "Docker · Ansible", cluster: 1, hub: false, block: "grass" },
     { label: "AquaSafe GIS", cluster: 1, hub: false, block: "grass" },
 
-    // Cluster 2: CI/CD Security & EgressGap
     { label: "EgressGap", cluster: 2, hub: true, block: "redstone_lamp" },
     { label: "IEEE ICC '27", cluster: 2, hub: true, block: "glowstone" },
     { label: "GitHub Actions", cluster: 2, hub: true, block: "command" },
     { label: "Egress Allowlist", cluster: 2, hub: true, block: "chest" },
     { label: "Harden-Runner", cluster: 2, hub: false, block: "redstone_lamp" },
     { label: "SNI Co-Tenancy", cluster: 2, hub: false, block: "glowstone" },
-    { label: "DNS Audit Log", cluster: 2, hub: false, block: "chest" },
     { label: "CCU Taiwan Lab", cluster: 2, hub: false, block: "bookshelf" },
   ];
 
@@ -298,18 +303,20 @@ export function createWorld(canvas) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  // ----- Khởi tạo các Khối Node (Hubs + Satellites) -----
-  const NODE_COUNT = 42;
+  // ----- Khởi tạo các Khối Block & Đom đóm / Lấp lánh nước sông -----
+  const NODE_COUNT = 28;
   const nodes = [];
+  const fireflies = [];
+  const waterSparkles = [];
 
-  function initNodes() {
+  function initEntities() {
     nodes.length = 0;
     for (let i = 0; i < NODE_COUNT; i++) {
       const concept = i < CORE_CONCEPTS.length ? CORE_CONCEPTS[i] : null;
       const cluster = concept ? concept.cluster : i % 3;
       const isHub = concept ? concept.hub : false;
       const block = concept ? concept.block : BLOCK_KEYS[i % BLOCK_KEYS.length];
-      const z = isHub ? 0.88 + (i % 3) * 0.14 : 0.48 + (i % 5) * 0.11;
+      const z = isHub ? 0.88 + (i % 3) * 0.14 : 0.52 + (i % 4) * 0.11;
       const gx = ((i * 0.61803398875) % 1) * 0.88 + 0.06;
       const gy = ((i * 0.38196601125 + (i / NODE_COUNT) * 0.5) % 1) * 1.15 - 0.05;
 
@@ -322,17 +329,41 @@ export function createWorld(canvas) {
         z,
         x: gx * width,
         y: gy * height,
-        vx: (Math.cos(i * 2.3) * 0.20 + (i % 2 === 0 ? 0.07 : -0.07)) * z,
-        vy: (Math.sin(i * 1.7) * 0.16 + (i % 3 === 0 ? 0.05 : -0.05)) * z,
-        size: isHub ? 32 : concept ? 25 : 19,
+        vx: (Math.cos(i * 2.3) * 0.18 + (i % 2 === 0 ? 0.06 : -0.06)) * z,
+        vy: (Math.sin(i * 1.7) * 0.14 + (i % 3 === 0 ? 0.05 : -0.05)) * z,
+        size: isHub ? 32 : concept ? 25 : 20,
         phase: i * 0.9,
         energy: 0,
+      });
+    }
+
+    fireflies.length = 0;
+    for (let i = 0; i < 26; i++) {
+      fireflies.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: -0.15 - Math.random() * 0.25,
+        size: 2 + (i % 3),
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+
+    waterSparkles.length = 0;
+    for (let i = 0; i < 22; i++) {
+      waterSparkles.push({
+        // Tập trung ở vùng dòng sông giữa-dưới bức ảnh
+        u: 0.34 + Math.random() * 0.38,
+        v: 0.58 + Math.random() * 0.38,
+        w: 6 + Math.random() * 14,
+        phase: Math.random() * Math.PI * 2,
+        speed: 1.8 + Math.random() * 2.2,
       });
     }
   }
 
   resize();
-  initNodes();
+  initEntities();
 
   window.addEventListener("resize", () => {
     const oldW = width || 1;
@@ -344,9 +375,8 @@ export function createWorld(canvas) {
     }
   });
 
-  // ----- Luồng XP Orbs / Redstone Packets chạy trên các cạnh -----
   const packets = [];
-  const MAX_PACKETS = 18;
+  const MAX_PACKETS = 14;
 
   function spawnPacket(a, b) {
     if (packets.length >= MAX_PACKETS) return;
@@ -359,8 +389,7 @@ export function createWorld(canvas) {
     });
   }
 
-  // ----- Tương tác chuột & Sóng xung truy vấn (Click Ripple) -----
-  const pointer = { x: -9999, y: -9999, active: false };
+  const pointer = { x: width * 0.5, y: height * 0.5, active: false };
   const ripples = [];
 
   window.addEventListener(
@@ -396,7 +425,6 @@ export function createWorld(canvas) {
     { passive: true }
   );
 
-  // ----- Theo dõi vị trí cuộn trang mượt mà (Smooth Scroll Parallax) -----
   let targetScrollY = window.scrollY || 0;
   let smoothScrollY = targetScrollY;
   window.addEventListener(
@@ -407,46 +435,80 @@ export function createWorld(canvas) {
     { passive: true }
   );
 
-  function drawGrid(theme, scrollOffset) {
-    const step = 44;
-    const offsetY = -((scrollOffset * 0.22) % step);
-    ctx.fillStyle = theme.gridDot;
-    for (let x = 22; x < width; x += step) {
-      for (let y = offsetY + 22; y < height; y += step) {
-        ctx.fillRect(x, y, 2, 2);
+  // ----- Vẽ lớp nền Thế giới 3D Minecraft Shader (Ảnh hoặc Video) kèm Parallax -----
+  function drawMinecraftShaderWorld(theme, t, scrollOffset) {
+    const media = bgVideoReady ? bgVideo : bgImgLoaded ? bgImg : null;
+    const mediaW = bgVideoReady ? bgVideo.videoWidth || 1920 : bgImg.naturalWidth || 1920;
+    const mediaH = bgVideoReady ? bgVideo.videoHeight || 1080 : bgImg.naturalHeight || 1080;
+
+    if (media) {
+      // Phóng nhẹ 1.09x để có biên độ trượt Parallax khi cuộn trang & di chuột
+      const zoom = 1.09 + Math.sin(t * 0.18) * 0.015;
+      const coverScale = Math.max(width / mediaW, height / mediaH) * zoom;
+      const drawW = mediaW * coverScale;
+      const drawH = mediaH * coverScale;
+
+      const maxPanX = (drawW - width) * 0.5;
+      const maxPanY = (drawH - height) * 0.5;
+
+      const mouseNormX = pointer.active ? (pointer.x / Math.max(1, width) - 0.5) * 2 : 0;
+      const mouseNormY = pointer.active ? (pointer.y / Math.max(1, height) - 0.5) * 2 : 0;
+      const scrollNorm = Math.min(1, Math.max(-1, (scrollOffset % 2400) / 1200 - 0.5));
+
+      const panX = -mouseNormX * Math.min(28, maxPanX * 0.65);
+      const panY = -scrollNorm * Math.min(42, maxPanY * 0.75) - mouseNormY * Math.min(14, maxPanY * 0.25);
+
+      const dx = (width - drawW) * 0.5 + panX;
+      const dy = (height - drawH) * 0.5 + panY;
+
+      ctx.drawImage(media, dx, dy, drawW, drawH);
+
+      // Lấp lánh nắng phản chiếu trên mặt nước sông (Animated Shader Water Glints)
+      ctx.fillStyle = theme.waterGlint;
+      for (const sp of waterSparkles) {
+        const pulse = Math.sin(t * sp.speed + sp.phase);
+        if (pulse > 0.15) {
+          const sx = dx + sp.u * drawW + Math.sin(t * 1.3 + sp.phase) * 6;
+          const sy = dy + sp.v * drawH;
+          const sw = sp.w * (pulse - 0.15);
+          ctx.fillRect(sx - sw * 0.5, sy, sw, 2);
+        }
       }
+    } else {
+      // Fallback màu nền trong vài mili-giây đầu khi ảnh đang nạp
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+      bgGrad.addColorStop(0, "#0c192c");
+      bgGrad.addColorStop(1, "#112233");
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, width, height);
     }
-  }
 
-  function drawAurora(theme, time, scrollOffset) {
-    for (let i = 0; i < theme.aurora.length; i++) {
-      const band = theme.aurora[i];
-      const baseY =
-        ((band.yFrac * height - scrollOffset * (0.1 + i * 0.04)) % (height + 240) +
-          (height + 240)) %
-          (height + 240) -
-        120;
+    // Lớp phủ ánh sáng khí quyển theo thời gian (Ngày / Hoàng hôn / Đêm)
+    const tintGrad = ctx.createLinearGradient(0, 0, 0, height);
+    tintGrad.addColorStop(0, theme.tintTop);
+    tintGrad.addColorStop(1, theme.tintBot);
+    ctx.fillStyle = tintGrad;
+    ctx.fillRect(0, 0, width, height);
 
-      ctx.beginPath();
-      const segs = 12;
-      for (let s = 0; s <= segs; s++) {
-        const x = (s / segs) * width;
-        const wave1 = Math.sin(s * 0.55 + time * band.speed + i * 1.7) * band.amp;
-        const wave2 = Math.cos(s * 0.9 - time * band.speed * 0.7) * (band.amp * 0.45);
-        const y = baseY + wave1 + wave2;
-        if (s === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+    // Tia nắng Volumetric (God Rays) từ góc trên bên phải
+    const sunGrad = ctx.createRadialGradient(width * 0.88, height * 0.12, 10, width * 0.88, height * 0.12, Math.max(width, height) * 0.75);
+    sunGrad.addColorStop(0, theme.sunbeam);
+    sunGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = sunGrad;
+    ctx.fillRect(0, 0, width, height);
+
+    // Hạt đom đóm / phấn hoa vuông kiểu Minecraft bay lơ lửng trong thung lũng
+    for (const f of fireflies) {
+      if (!noMotion) {
+        f.x += f.vx + Math.sin(t * 1.1 + f.phase) * 0.18;
+        f.y += f.vy;
+        if (f.y < -10) f.y = height + 10;
+        if (f.x < -10) f.x = width + 10;
+        else if (f.x > width + 10) f.x = -10;
       }
-      ctx.lineTo(width, baseY + 220);
-      ctx.lineTo(0, baseY + 220);
-      ctx.closePath();
-
-      const grad = ctx.createLinearGradient(0, baseY - band.amp, 0, baseY + 200);
-      grad.addColorStop(0, "rgba(0, 0, 0, 0)");
-      grad.addColorStop(0.35, band.color);
-      grad.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = grad;
-      ctx.fill();
+      const glowAlpha = 0.35 + Math.sin(t * 2.6 + f.phase) * 0.30;
+      ctx.fillStyle = `rgba(${theme.fireflyRgb}, ${Math.max(0.08, glowAlpha).toFixed(3)})`;
+      ctx.fillRect(f.x, f.y, f.size, f.size);
     }
   }
 
@@ -461,20 +523,11 @@ export function createWorld(canvas) {
     smoothScrollY += (targetScrollY - smoothScrollY) * Math.min(1, dt * 10);
     const theme = THEMES[timeMode];
 
-    // 1. Nền Gradient
-    const bgGrad = ctx.createLinearGradient(0, 0, width * 0.35, height);
-    bgGrad.addColorStop(0, theme.bgTop);
-    bgGrad.addColorStop(0.52, theme.bgMid);
-    bgGrad.addColorStop(1, theme.bgBot);
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, width, height);
+    // 1. Vẽ cảnh nền Thế giới 3D Minecraft Shader + Mặt nước lấp lánh + Đom đóm
+    drawMinecraftShaderWorld(theme, t, smoothScrollY);
 
-    // 2. Dải sóng Aurora & Lưới toạ độ
-    drawAurora(theme, t, smoothScrollY);
-    drawGrid(theme, smoothScrollY);
-
-    // 3. Cập nhật vị trí các Khối Block
-    const linkDist = Math.min(width, height) < 640 ? 140 : 185;
+    // 2. Cập nhật vị trí các Khối Block trên Đồ thị Tri thức
+    const linkDist = Math.min(width, height) < 640 ? 145 : 195;
     const linkDistSq = linkDist * linkDist;
     const wrapH = height + 160;
 
@@ -489,7 +542,6 @@ export function createWorld(canvas) {
         else if (n.y > height + 80) n.y -= wrapH;
       }
 
-      // Nhịp nhấp nhô (floating bobbing) kiểu vật phẩm Minecraft
       const bobOffset = Math.sin(t * 2.0 + n.phase) * 3.5;
       const parallaxY = ((n.y - smoothScrollY * (0.18 * n.z)) % wrapH + wrapH) % wrapH - 80 + bobOffset;
       n.sx = n.x;
@@ -510,7 +562,7 @@ export function createWorld(canvas) {
       }
     }
 
-    // 4. Vẽ sóng truy vấn (Click Ripples)
+    // 3. Vẽ sóng truy vấn (Click Ripples)
     for (let i = ripples.length - 1; i >= 0; i--) {
       const rp = ripples[i];
       rp.r += dt * 360;
@@ -532,8 +584,8 @@ export function createWorld(canvas) {
       if (rp.r >= rp.maxR) ripples.splice(i, 1);
     }
 
-    // 5. Vẽ các cạnh nối giữa các Khối Block
-    ctx.lineWidth = 1.1;
+    // 4. Vẽ các cạnh nối giữa các Khối Block
+    ctx.lineWidth = 1.15;
     for (let i = 0; i < nodes.length; i++) {
       const a = nodes[i];
       for (let j = i + 1; j < nodes.length; j++) {
@@ -546,7 +598,7 @@ export function createWorld(canvas) {
           const ratio = 1 - d / linkDist;
           const sameCluster = a.cluster === b.cluster;
           const boost = Math.max(a.energy, b.energy) * 0.35;
-          const alpha = Math.min(0.55, ratio * (sameCluster ? 0.32 : 0.16) + boost);
+          const alpha = Math.min(0.60, ratio * (sameCluster ? 0.36 : 0.18) + boost);
 
           const rgb = sameCluster ? theme.clusters[a.cluster].rgb : theme.edgeRgb;
           ctx.strokeStyle = `rgba(${rgb}, ${alpha.toFixed(3)})`;
@@ -555,29 +607,21 @@ export function createWorld(canvas) {
           ctx.lineTo(b.sx, b.sy);
           ctx.stroke();
 
-          if (!noMotion && Math.random() < 0.0013 && (a.isHub || b.isHub)) {
+          if (!noMotion && Math.random() < 0.0018 && (a.isHub || b.isHub)) {
             spawnPacket(a, b);
           }
         }
       }
     }
 
-    // 6. Vẽ tia kết nối từ con trỏ chuột tới các Khối Block gần nhất
+    // 5. Vẽ tia kết nối từ con trỏ chuột tới các Khối Block gần nhất
     if (pointer.active) {
-      const glow = ctx.createRadialGradient(pointer.x, pointer.y, 4, pointer.x, pointer.y, 195);
-      glow.addColorStop(0, `rgba(${theme.cursorRgb}, 0.11)`);
-      glow.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = glow;
-      ctx.beginPath();
-      ctx.arc(pointer.x, pointer.y, 195, 0, Math.PI * 2);
-      ctx.fill();
-
       for (const n of nodes) {
         const d = Math.hypot(pointer.x - n.sx, pointer.y - n.sy);
-        if (d < 180) {
-          const alpha = (1 - d / 180) * 0.40;
+        if (d < 185) {
+          const alpha = (1 - d / 185) * 0.45;
           ctx.strokeStyle = `rgba(${theme.cursorRgb}, ${alpha.toFixed(3)})`;
-          ctx.lineWidth = 1.2;
+          ctx.lineWidth = 1.25;
           ctx.beginPath();
           ctx.moveTo(pointer.x, pointer.y);
           ctx.lineTo(n.sx, n.sy);
@@ -586,7 +630,7 @@ export function createWorld(canvas) {
       }
     }
 
-    // 7. Vẽ các hạt XP Orb / Redstone Packet vuông chạy trên cạnh
+    // 6. Vẽ các hạt XP Orb / Redstone Packet vuông chạy trên cạnh
     for (let i = packets.length - 1; i >= 0; i--) {
       const pk = packets[i];
       pk.t += pk.speed * (dt * 60);
@@ -599,13 +643,13 @@ export function createWorld(canvas) {
       const py = pk.from.sy + (pk.to.sy - pk.from.sy) * pk.t;
       const cRgb = theme.clusters[pk.cluster].rgb;
 
-      ctx.fillStyle = `rgba(${cRgb}, 0.25)`;
+      ctx.fillStyle = `rgba(${cRgb}, 0.28)`;
       ctx.fillRect(px - 5, py - 5, 10, 10);
       ctx.fillStyle = `rgba(${cRgb}, 0.98)`;
       ctx.fillRect(px - 2.5, py - 2.5, 5, 5);
     }
 
-    // 8. Vẽ các Khối Isometric Minecraft Block + Nhãn Khái niệm
+    // 7. Vẽ các Khối Isometric Minecraft Block + Nhãn Khái niệm
     ctx.font = '600 11px "JetBrains Mono", monospace';
     ctx.textBaseline = "middle";
 
@@ -614,21 +658,18 @@ export function createWorld(canvas) {
       const scale = 1 + n.energy * 0.24;
       const drawSize = n.size * scale;
 
-      // Vòng sáng Enchantment / Beacon dưới chân khối
       if (n.isHub || n.energy > 0.12) {
         const haloR = drawSize * 0.72;
-        const haloAlpha = n.isHub ? 0.18 + n.energy * 0.24 : n.energy * 0.26;
+        const haloAlpha = n.isHub ? 0.22 + n.energy * 0.24 : n.energy * 0.28;
         ctx.beginPath();
         ctx.arc(n.sx, n.sy, haloR, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${c.rgb}, ${haloAlpha.toFixed(3)})`;
         ctx.fill();
       }
 
-      // Vẽ Sprite khối Minecraft Isometric đã pre-render
       const sprite = blockSprites[n.block] || blockSprites.grass;
       ctx.drawImage(sprite, n.sx - drawSize * 0.5, n.sy - drawSize * 0.5, drawSize, drawSize);
 
-      // Hiệu ứng hạt lấp lánh (Enchantment Pixel Sparkles) khi khối đang được kích hoạt
       if (n.energy > 0.25) {
         const spX = n.sx + Math.cos(t * 5 + n.phase) * (drawSize * 0.58);
         const spY = n.sy + Math.sin(t * 6 + n.phase) * (drawSize * 0.58);
@@ -636,14 +677,13 @@ export function createWorld(canvas) {
         ctx.fillRect(spX - 1.5, spY - 1.5, 3, 3);
       }
 
-      // Nhãn văn bản bên cạnh khối
       if (n.label && (n.isHub || n.energy > 0.22)) {
-        const labelAlpha = n.isHub ? 0.85 + n.energy * 0.15 : n.energy * 0.9;
-        const tx = n.sx + drawSize * 0.52 + 4;
+        const labelAlpha = n.isHub ? 0.92 : Math.min(0.95, n.energy);
+        const tx = n.sx + drawSize * 0.52 + 5;
         const ty = n.sy;
-        ctx.fillStyle = `rgba(2, 6, 23, ${(labelAlpha * 0.65).toFixed(3)})`;
-        ctx.fillText(n.label, tx + 1, ty + 1);
-        ctx.fillStyle = `rgba(241, 245, 249, ${labelAlpha.toFixed(3)})`;
+        ctx.fillStyle = `rgba(2, 6, 23, ${(labelAlpha * 0.82).toFixed(3)})`;
+        ctx.fillText(n.label, tx + 1.2, ty + 1.2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${labelAlpha.toFixed(3)})`;
         ctx.fillText(n.label, tx, ty);
       }
     }
@@ -679,6 +719,10 @@ export function createWorld(canvas) {
     },
     setPaused(p) {
       paused = !!p;
+      if (bgVideoReady && bgVideo) {
+        if (paused) bgVideo.pause();
+        else bgVideo.play().catch(() => {});
+      }
     },
     cycleTimeMode() {
       timeMode = (timeMode + 1) % THEMES.length;
