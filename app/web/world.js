@@ -1,16 +1,16 @@
-// Cảnh nền ĐỘNG Thế giới 3D Minecraft BSL/Complementary Shader (60fps Real-Time Living Wallpaper)
-// kết hợp Đồ thị Tri thức các Khối Isometric Minecraft tương tác.
+// Living 3D Minecraft BSL/Complementary Shader World + 60fps Isometric Block Knowledge Graph
+// + Frame Hover "Voxel Block & Wildflower Bloom" Overlay Engine (#fx-canvas).
 //
-// Các hiệu ứng chuyển động thời gian thực ngay trên cảnh 3D Minecraft Shader:
-//   1. Dòng sông chảy & gợn sóng khúc xạ thật (Real-time River Water Refraction & Ripples)
-//      từ dưới gầm cầu đá rêu phong xuống tới thảm bèo/lá súng tiền cảnh.
-//   2. Bọt nước & tia nước bắn tung toé dưới chân bánh xe nước gỗ (Waterwheel Splash & Foam).
-//   3. Khói bếp voxel bốc lên và uốn lượn từ ống khói ngôi nhà cổ (Chimney Smoke Puffs).
-//   4. Ánh đèn lồng và cửa sổ nhà cổập bùng ấm áp (Warm Flickering Lanterns & Windows).
-//   5. Tia nắng Volumetric (God Rays) chuyển động nhẹ từ mặt trời góc phải + Lá cây & Đom đóm bay.
-//   6. Camera lướt êm ái (Cinematic Glide + Scroll/Mouse Parallax) & Đồ thị khối Minecraft nổi.
+// Features:
+//   1. Real-time River Water Refraction, Waterwheel Splash, Chimney Smoke, Flickering Lanterns,
+//      Volumetric Sunbeams, Voxel Leaves & Fireflies over ./assets/mc-shader-bg.jpg.
+//   2. 60fps Interactive Knowledge Graph with pre-rendered Isometric Minecraft Block sprites.
+//   3. Frame Hover Bloom (#fx-canvas): hovering any section or card (.frosted-section, .card,
+//      .academic-row, .media-card, .cv-item, .portrait-frame, .s-link) triggers an elastic
+//      bloom of pixel-art Minecraft wildflowers, popping isometric blocks, and a glowing
+//      border garden around the active frame.
 //
-// Giữ nguyên hợp đồng API: createWorld(canvas) -> { setPapers(list), setPaused(flag), cycleTimeMode() }
+// Preserves API contract: createWorld(canvas) -> { setPapers(list), setPaused(flag), cycleTimeMode() }
 
 export function createWorld(canvas) {
   const noMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -23,7 +23,11 @@ export function createWorld(canvas) {
     return { setPapers() {}, setPaused() {}, cycleTimeMode() { return 0; } };
   }
 
-  // ----- Tải ảnh nền 3D Minecraft Shader + Hỗ trợ Video nền (nếu có) -----
+  // Foreground FX Canvas for Frame Hover Block & Flower Bloom
+  const fxCanvas = document.getElementById("fx-canvas");
+  const fxCtx = fxCanvas ? fxCanvas.getContext("2d", { alpha: true }) : null;
+
+  // ----- Load 3D Minecraft Shader Wallpaper + Optional Video Loop -----
   const bgImg = new Image();
   let bgImgLoaded = false;
   bgImg.onload = () => {
@@ -47,10 +51,10 @@ export function createWorld(canvas) {
     });
   }
 
-  // ----- 3 chế độ ánh sáng Shader (Ngày nắng / Hoàng hôn / Đêm đom đóm) -----
+  // ----- 3 Shader Lighting Themes (Daylight / Sunset / Firefly Night) -----
   const THEMES = [
     {
-      name: "Ngày Nắng Shader",
+      name: "Daylight Shader",
       tintTop: "rgba(10, 22, 40, 0.12)",
       tintBot: "rgba(8, 18, 32, 0.28)",
       sunbeam: "rgba(254, 243, 199, 0.14)",
@@ -66,7 +70,7 @@ export function createWorld(canvas) {
       cursorRgb: "254, 240, 138",
     },
     {
-      name: "Hoàng Hôn Shader",
+      name: "Sunset Shader",
       tintTop: "rgba(67, 20, 48, 0.30)",
       tintBot: "rgba(28, 16, 38, 0.46)",
       sunbeam: "rgba(251, 146, 60, 0.19)",
@@ -82,7 +86,7 @@ export function createWorld(canvas) {
       cursorRgb: "251, 146, 60",
     },
     {
-      name: "Đêm Đom Đóm Shader",
+      name: "Firefly Night",
       tintTop: "rgba(3, 10, 28, 0.56)",
       tintBot: "rgba(4, 12, 30, 0.70)",
       sunbeam: "rgba(56, 189, 248, 0.09)",
@@ -102,7 +106,7 @@ export function createWorld(canvas) {
   let timeMode = 0;
 
   // =========================================================================
-  // BỘ TẠO SPRITE KHỐI ISOMETRIC MINECRAFT (PRE-RENDERED PIXEL ART 8x8x8)
+  // 1. PRE-RENDERED ISOMETRIC MINECRAFT BLOCK SPRITES (8x8x8)
   // =========================================================================
   function shadeHex(hex, factor) {
     const n = parseInt(hex.slice(1), 16);
@@ -267,6 +271,54 @@ export function createWorld(canvas) {
     blockSprites[k] = buildIsometricBlockSprite(k);
   }
 
+  // =========================================================================
+  // 2. PRE-RENDERED PIXEL-ART MINECRAFT WILDFLOWER SPRITES (6 VARIETIES)
+  // =========================================================================
+  const FLOWER_PALETTES = [
+    { outer: "#ef4444", inner: "#dc2626", core: "#fde047" }, // Poppy Red
+    { outer: "#fde047", inner: "#f59e0b", core: "#78350f" }, // Dandelion Gold
+    { outer: "#38bdf8", inner: "#0284c7", core: "#fef08a" }, // Blue Orchid
+    { outer: "#c084fc", inner: "#9333ea", core: "#fdf4ff" }, // Allium Lavender
+    { outer: "#f472b6", inner: "#db2777", core: "#fef08a" }, // Sakura Pink
+    { outer: "#f8fafc", inner: "#cbd5e1", core: "#facc15" }, // Oxeye Daisy
+  ];
+
+  const flowerSprites = FLOWER_PALETTES.map((pal) => {
+    const off = document.createElement("canvas");
+    off.width = 36;
+    off.height = 36;
+    const c = off.getContext("2d");
+    const p = 3; // size of 1 pixel block
+
+    // Pixel stem & leaves
+    c.fillStyle = "#15803d";
+    c.fillRect(5 * p, 7 * p, 2 * p, 4 * p);
+    c.fillStyle = "#22c55e";
+    c.fillRect(3 * p, 8 * p, 2 * p, p);
+    c.fillRect(7 * p, 9 * p, 2 * p, p);
+
+    // Outer petals (pixel cross + diagonals)
+    c.fillStyle = pal.outer;
+    c.fillRect(4 * p, 1 * p, 4 * p, 2 * p);
+    c.fillRect(4 * p, 7 * p, 4 * p, 2 * p);
+    c.fillRect(1 * p, 4 * p, 2 * p, 4 * p);
+    c.fillRect(9 * p, 4 * p, 2 * p, 4 * p);
+    c.fillRect(2 * p, 2 * p, 2 * p, 2 * p);
+    c.fillRect(8 * p, 2 * p, 2 * p, 2 * p);
+    c.fillRect(2 * p, 6 * p, 2 * p, 2 * p);
+    c.fillRect(8 * p, 6 * p, 2 * p, 2 * p);
+
+    // Inner ring
+    c.fillStyle = pal.inner;
+    c.fillRect(3 * p, 3 * p, 6 * p, 4 * p);
+
+    // Flower center
+    c.fillStyle = pal.core;
+    c.fillRect(4.5 * p, 4 * p, 3 * p, 2 * p);
+
+    return off;
+  });
+
   const CORE_CONCEPTS = [
     { label: "GraphRAG", cluster: 0, hub: true, block: "enchant" },
     { label: "LightRAG", cluster: 0, hub: true, block: "emerald" },
@@ -304,9 +356,14 @@ export function createWorld(canvas) {
     canvas.width = Math.floor(width * dpr);
     canvas.height = Math.floor(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    if (fxCanvas && fxCtx) {
+      fxCanvas.width = Math.floor(width * dpr);
+      fxCanvas.height = Math.floor(height * dpr);
+      fxCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
   }
 
-  // ----- Khởi tạo Khối Block, Khói ống khói, Bọt bánh xe nước, Lá bay & Đom đóm -----
   const NODE_COUNT = 26;
   const nodes = [];
   const fireflies = [];
@@ -315,7 +372,6 @@ export function createWorld(canvas) {
   const wheelSplashes = [];
   const waterSparkles = [];
 
-  // Toạ độ chuẩn hoá (u, v) của các đèn lồng & cửa sổ ấm áp trên ngôi nhà cổ
   const LANTERN_SPOTS = [
     { u: 0.149, v: 0.625, r: 28, phase: 0.2 },
     { u: 0.217, v: 0.627, r: 28, phase: 1.5 },
@@ -398,7 +454,6 @@ export function createWorld(canvas) {
     waterSparkles.length = 0;
     for (let i = 0; i < 32; i++) {
       const v = 0.58 + Math.random() * 0.40;
-      // Theo sát lòng sông từ cầu đá (v=0.58) xuống tiền cảnh (v=0.98)
       const riverCenterU = 0.61 - (v - 0.58) * 0.16;
       const halfWidthU = 0.06 + (v - 0.58) * 0.36;
       waterSparkles.push({
@@ -424,6 +479,203 @@ export function createWorld(canvas) {
     }
   });
 
+  // =========================================================================
+  // 3. FRAME HOVER "VOXEL BLOCK & WILDFLOWER BLOOM" ENGINE (#fx-canvas)
+  // =========================================================================
+  const bloomParticles = []; // Bursting blocks, blooming flowers & pixel petals
+  const frameGarden = [];    // Persistent flowers & mini-blocks growing along hovered card border
+  let hoveredEl = null;
+  let hoverProgress = 0;
+
+  const HOVER_SELECTOR = ".card, .academic-row, .media-card, .cv-item, .portrait-frame, .s-link, .frosted-section";
+
+  // Elastic spring ease-out curve for flower/block blooming (0 -> 1.24 -> 1.0)
+  function easeOutBack(x) {
+    const c1 = 1.70158;
+    const c3 = c1 + 1;
+    return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+  }
+
+  function spawnBloomBurst(x, y, count = 8) {
+    if (noMotion) return;
+    for (let i = 0; i < count; i++) {
+      const isBlock = i % 2 === 0;
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+      const speed = 1.1 + Math.random() * 2.4;
+      bloomParticles.push({
+        kind: isBlock ? "block" : "flower",
+        sprite: isBlock
+          ? blockSprites[BLOCK_KEYS[Math.floor(Math.random() * BLOCK_KEYS.length)]]
+          : flowerSprites[Math.floor(Math.random() * flowerSprites.length)],
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1.2,
+        size: isBlock ? 17 + Math.random() * 8 : 16 + Math.random() * 8,
+        age: 0,
+        life: 0.75 + Math.random() * 0.45,
+        rot: (Math.random() - 0.5) * 0.4,
+        vRot: (Math.random() - 0.5) * 1.6,
+      });
+    }
+    if (bloomParticles.length > 90) {
+      bloomParticles.splice(0, bloomParticles.length - 90);
+    }
+  }
+
+  function buildFrameGardenFor(el) {
+    frameGarden.length = 0;
+    if (!el) return;
+    const isLargeSection = el.classList.contains("frosted-section");
+    const count = isLargeSection ? 12 : 8;
+    for (let i = 0; i < count; i++) {
+      const isBlock = i % 2 === 1;
+      // Place along top edge (60%) and left/right upper corners (40%)
+      const edge = i < Math.ceil(count * 0.65) ? "top" : i % 2 === 0 ? "left" : "right";
+      const t = edge === "top" ? (i + 0.6) / Math.ceil(count * 0.65) : 0.18 + ((i * 0.37) % 0.65);
+      frameGarden.push({
+        edge,
+        t: Math.min(0.94, Math.max(0.06, t)),
+        kind: isBlock ? "block" : "flower",
+        sprite: isBlock
+          ? blockSprites[BLOCK_KEYS[(i * 3) % BLOCK_KEYS.length]]
+          : flowerSprites[i % flowerSprites.length],
+        size: isBlock ? 21 : 20,
+        delay: i * 0.045,
+        phase: i * 1.3,
+      });
+    }
+  }
+
+  document.addEventListener(
+    "pointerover",
+    (e) => {
+      if (noMotion || document.body.classList.contains("scenic-mode")) return;
+      const target = e.target.closest?.(HOVER_SELECTOR);
+      if (!target || target === hoveredEl) return;
+
+      hoveredEl = target;
+      hoverProgress = 0;
+      buildFrameGardenFor(target);
+
+      const rect = target.getBoundingClientRect();
+      // Spawn sprout burst at cursor entry point (or card corner)
+      const bx = e.clientX > 0 ? e.clientX : rect.left + rect.width * 0.5;
+      const by = e.clientY > 0 ? e.clientY : rect.top;
+      spawnBloomBurst(bx, by, target.classList.contains("frosted-section") ? 7 : 10);
+
+      // Also pop 2 corner blooms on the card
+      spawnBloomBurst(rect.left + 14, rect.top + 8, 3);
+      spawnBloomBurst(rect.right - 14, rect.top + 8, 3);
+    },
+    { passive: true }
+  );
+
+  document.addEventListener(
+    "pointerout",
+    (e) => {
+      if (!hoveredEl) return;
+      const next = e.relatedTarget?.closest?.(HOVER_SELECTOR);
+      if (next !== hoveredEl) {
+        hoveredEl = next || null;
+        if (hoveredEl) {
+          hoverProgress = 0;
+          buildFrameGardenFor(hoveredEl);
+        }
+      }
+    },
+    { passive: true }
+  );
+
+  function renderFrameBloomFX(dt, t) {
+    if (!fxCtx) return;
+    fxCtx.clearRect(0, 0, width, height);
+    if (document.body.classList.contains("scenic-mode")) return;
+
+    // 1. Render Active Hovered Frame's Blooming Border Garden (Flowers & Mini-Blocks)
+    if (hoveredEl && document.body.contains(hoveredEl)) {
+      hoverProgress = Math.min(1, hoverProgress + dt * 2.8);
+      const rect = hoveredEl.getBoundingClientRect();
+
+      if (rect.bottom > 0 && rect.top < height) {
+        // Subtle glowing voxel highlight trace gliding along top border
+        const traceW = Math.min(140, rect.width * 0.35);
+        const traceX = rect.left + ((t * 180) % Math.max(1, rect.width - traceW));
+        const grad = fxCtx.createLinearGradient(traceX, rect.top, traceX + traceW, rect.top);
+        grad.addColorStop(0, "rgba(52, 211, 153, 0)");
+        grad.addColorStop(0.5, "rgba(110, 231, 183, 0.75)");
+        grad.addColorStop(1, "rgba(56, 189, 248, 0)");
+        fxCtx.fillStyle = grad;
+        fxCtx.fillRect(traceX, rect.top - 1.5, traceW, 3);
+
+        // Sprout & bob the anchored wildflowers & isometric blocks along the frame edge
+        for (const item of frameGarden) {
+          const localP = Math.max(0, Math.min(1, (hoverProgress - item.delay) / 0.55));
+          if (localP <= 0) continue;
+          const bloomScale = easeOutBack(localP);
+
+          let gx = rect.left;
+          let gy = rect.top;
+          if (item.edge === "top") {
+            gx = rect.left + rect.width * item.t;
+            gy = rect.top - 4;
+          } else if (item.edge === "left") {
+            gx = rect.left - 4;
+            gy = rect.top + rect.height * item.t;
+          } else {
+            gx = rect.right + 4;
+            gy = rect.top + rect.height * item.t;
+          }
+
+          const bob = Math.sin(t * 3.4 + item.phase) * 2.5;
+          const sway = Math.cos(t * 2.6 + item.phase) * 0.14;
+          const sz = item.size * bloomScale;
+
+          fxCtx.save();
+          fxCtx.translate(gx, gy + bob);
+          fxCtx.rotate(sway);
+          fxCtx.drawImage(item.sprite, -sz * 0.5, -sz * 0.5, sz, sz);
+          fxCtx.restore();
+        }
+      }
+    }
+
+    // 2. Render Bursting Voxel Blocks & Blooming Wildflowers
+    for (let i = bloomParticles.length - 1; i >= 0; i--) {
+      const bp = bloomParticles[i];
+      bp.age += dt;
+      if (bp.age >= bp.life) {
+        bloomParticles.splice(i, 1);
+        continue;
+      }
+
+      const prog = bp.age / bp.life;
+      bp.x += bp.vx * (dt * 60);
+      bp.y += bp.vy * (dt * 60);
+      bp.vy += 0.055 * (dt * 60); // gentle float-arc gravity
+      bp.rot += bp.vRot * dt;
+
+      // Elastic bloom open in first 35%, hold, then fade smoothly
+      const popScale = prog < 0.35 ? easeOutBack(prog / 0.35) : 1 - (prog - 0.35) * 0.45;
+      const alpha = prog > 0.65 ? Math.max(0, 1 - (prog - 0.65) / 0.35) : 1;
+      const sz = bp.size * Math.max(0.1, popScale);
+
+      fxCtx.save();
+      fxCtx.globalAlpha = alpha;
+      fxCtx.translate(bp.x, bp.y);
+      fxCtx.rotate(bp.rot);
+      fxCtx.drawImage(bp.sprite, -sz * 0.5, -sz * 0.5, sz, sz);
+
+      // Tiny golden pixel pollen / enchantment spark next to blooming item
+      if (prog < 0.6) {
+        fxCtx.fillStyle = "#fef08a";
+        fxCtx.fillRect(sz * 0.45, -sz * 0.45, 2.5, 2.5);
+      }
+      fxCtx.restore();
+    }
+  }
+
+  // ----- Knowledge Graph Data Packets -----
   const packets = [];
   const MAX_PACKETS = 14;
 
@@ -470,6 +722,7 @@ export function createWorld(canvas) {
         alpha: 0.65,
       });
       if (ripples.length > 4) ripples.shift();
+      spawnBloomBurst(e.clientX, e.clientY, 10);
     },
     { passive: true }
   );
@@ -485,7 +738,7 @@ export function createWorld(canvas) {
   );
 
   // =========================================================================
-  // VẼ THẾ GIỚI 3D MINECRAFT ĐỘNG (NƯỚC CHẢY, KHÓI BẾP, BÁNH XE NƯỚC, ĐÈN LỒNG)
+  // 4. LIVING 3D MINECRAFT SHADER WORLD (RIVER REFRACTION, SMOKE, SPLASH)
   // =========================================================================
   function drawAnimatedMinecraftWorld(theme, t, dt, scrollOffset) {
     const media = bgVideoReady ? bgVideo : bgImgLoaded ? bgImg : null;
@@ -493,7 +746,6 @@ export function createWorld(canvas) {
     const mediaH = bgVideoReady ? bgVideo.videoHeight || 1080 : bgImg.naturalHeight || 1080;
 
     if (media) {
-      // Camera thở & lướt nhẹ tự động ngay cả khi không di chuột
       const zoom = 1.11 + Math.sin(t * 0.28) * 0.022;
       const coverScale = Math.max(width / mediaW, height / mediaH) * zoom;
       const drawW = mediaW * coverScale;
@@ -515,13 +767,11 @@ export function createWorld(canvas) {
       const dx = (width - drawW) * 0.5 + panX;
       const dy = (height - drawH) * 0.5 + panY;
 
-      // 1. Vẽ toàn cảnh bức ảnh 3D Minecraft Shader gốc
       ctx.drawImage(media, dx, dy, drawW, drawH);
 
-      // 2. HIỆU ỨNG NƯỚC SÔNG CHẢY & GỢN SÓNG KHÚC XẠ THỜI GIAN THỰC (River Water Refraction)
+      // Real-time River Water Refraction
       if (!noMotion && !bgVideoReady) {
         ctx.save();
-        // Khoanh vùng đa giác lòng sông (từ gầm cầu đá v=0.57 xuống tiền cảnh v=1.0)
         ctx.beginPath();
         ctx.moveTo(dx + 0.57 * drawW, dy + 0.575 * drawH);
         ctx.lineTo(dx + 0.68 * drawW, dy + 0.575 * drawH);
@@ -540,8 +790,7 @@ export function createWorld(canvas) {
 
         for (let i = 0; i < STRIPS; i++) {
           const v0 = vStart + i * vStep;
-          const depthFactor = (v0 - vStart) / (vEnd - vStart); // gần camera sóng lớn hơn
-          // Sóng chảy hướng về phía người xem (t * 3.6 - i * 0.55)
+          const depthFactor = (v0 - vStart) / (vEnd - vStart);
           const waveX = Math.sin(t * 3.6 - i * 0.58) * (1.8 + depthFactor * 5.2);
           const waveY = Math.cos(t * 2.8 - i * 0.45) * (0.4 + depthFactor * 1.4);
 
@@ -555,7 +804,7 @@ export function createWorld(canvas) {
         ctx.restore();
       }
 
-      // 3. BỌT NƯỚC & TIA NƯỚC BẮN DƯỚI BÁNH XE NƯỚC GỖ (Waterwheel Splash)
+      // Waterwheel Foam Splash
       const wheelX = dx + 0.402 * drawW;
       const wheelBaseY = dy + 0.728 * drawH;
       for (const sp of wheelSplashes) {
@@ -570,7 +819,7 @@ export function createWorld(canvas) {
         ctx.fillRect(sx, sy, sz, sz);
       }
 
-      // 4. KHÓI BẾP VOXEL BỐC LÊN TỪ ỐNG KHÓI NHÀ CỔ (Chimney Smoke Puffs)
+      // Cottage Chimney Smoke Puffs
       const chimX = dx + 0.300 * drawW;
       const chimY = dy + 0.332 * drawH;
       for (const sm of chimneySmoke) {
@@ -585,7 +834,7 @@ export function createWorld(canvas) {
         ctx.fillRect(chimX + sway - sz * 0.5, chimY - rise - sz * 0.5, sz, sz);
       }
 
-      // 5. ÁNH ĐÈN LỒNG & CỬA SỔ NHÀ CỔ BẬP BÙNG ẤM ÁP (Flickering Lanterns)
+      // Warm Flickering Lanterns & Windows
       for (const lt of LANTERN_SPOTS) {
         const lx = dx + lt.u * drawW;
         const ly = dy + lt.v * drawH;
@@ -600,11 +849,10 @@ export function createWorld(canvas) {
         ctx.fill();
       }
 
-      // 6. VỆT NẮNG LẤP LÁNH TRÔI TRÊN DÒNG SÔNG (Flowing River Sun Glints)
+      // Flowing River Sun Glints
       ctx.fillStyle = theme.waterGlint;
       for (const sp of waterSparkles) {
         if (!noMotion) {
-          // Trôi nhẹ dọc theo dòng chảy về phía tiền cảnh
           sp.v += dt * 0.022;
           if (sp.v > 0.98) {
             sp.v = 0.58;
@@ -626,14 +874,12 @@ export function createWorld(canvas) {
       ctx.fillRect(0, 0, width, height);
     }
 
-    // 7. Lớp phủ khí quyển Ngày / Hoàng hôn / Đêm
     const tintGrad = ctx.createLinearGradient(0, 0, 0, height);
     tintGrad.addColorStop(0, theme.tintTop);
     tintGrad.addColorStop(1, theme.tintBot);
     ctx.fillStyle = tintGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // 8. Tia nắng Volumetric (Breathing Sunbeams)
     const sunPulse = 0.85 + Math.sin(t * 0.9) * 0.15;
     const sunGrad = ctx.createRadialGradient(
       width * 0.90,
@@ -648,7 +894,6 @@ export function createWorld(canvas) {
     ctx.fillStyle = sunGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // 9. Lá cây Voxel bay theo gió qua thung lũng
     for (const lf of fallingLeaves) {
       if (!noMotion) {
         lf.x += lf.vx + Math.sin(t * 1.6 + lf.phase) * 0.35;
@@ -660,7 +905,6 @@ export function createWorld(canvas) {
       ctx.fillRect(lf.x, lf.y, lf.size, lf.size);
     }
 
-    // 10. Đom đóm lấp lánh bay lên từ mặt sông và bờ cỏ
     for (const f of fireflies) {
       if (!noMotion) {
         f.x += f.vx + Math.sin(t * 1.3 + f.phase) * 0.22;
@@ -686,10 +930,10 @@ export function createWorld(canvas) {
     smoothScrollY += (targetScrollY - smoothScrollY) * Math.min(1, dt * 10);
     const theme = THEMES[timeMode];
 
-    // 1. Vẽ Thế giới 3D Minecraft ĐỘNG (Nước sông chảy, khói bếp, bánh xe nước, đèn lồng, lá bay)
+    // 1. Living 3D Minecraft Shader Background
     drawAnimatedMinecraftWorld(theme, t, dt, smoothScrollY);
 
-    // 2. Cập nhật vị trí các Khối Block trên Đồ thị Tri thức
+    // 2. Update Isometric Minecraft Block Knowledge Graph Nodes
     const linkDist = Math.min(width, height) < 640 ? 145 : 195;
     const linkDistSq = linkDist * linkDist;
     const wrapH = height + 160;
@@ -725,7 +969,7 @@ export function createWorld(canvas) {
       }
     }
 
-    // 3. Vẽ sóng truy vấn (Click Ripples)
+    // 3. Click Ripples
     for (let i = ripples.length - 1; i >= 0; i--) {
       const rp = ripples[i];
       rp.r += dt * 360;
@@ -747,7 +991,7 @@ export function createWorld(canvas) {
       if (rp.r >= rp.maxR) ripples.splice(i, 1);
     }
 
-    // 4. Vẽ các cạnh nối giữa các Khối Block
+    // 4. Graph Edges
     ctx.lineWidth = 1.15;
     for (let i = 0; i < nodes.length; i++) {
       const a = nodes[i];
@@ -777,7 +1021,7 @@ export function createWorld(canvas) {
       }
     }
 
-    // 5. Vẽ tia kết nối từ con trỏ chuột tới các Khối Block gần nhất
+    // 5. Pointer Links
     if (pointer.active) {
       for (const n of nodes) {
         const d = Math.hypot(pointer.x - n.sx, pointer.y - n.sy);
@@ -793,7 +1037,7 @@ export function createWorld(canvas) {
       }
     }
 
-    // 6. Vẽ các hạt XP Orb / Redstone Packet vuông chạy trên cạnh
+    // 6. XP Orb / Redstone Packets along Edges
     for (let i = packets.length - 1; i >= 0; i--) {
       const pk = packets[i];
       pk.t += pk.speed * (dt * 60);
@@ -812,7 +1056,7 @@ export function createWorld(canvas) {
       ctx.fillRect(px - 2.5, py - 2.5, 5, 5);
     }
 
-    // 7. Vẽ các Khối Isometric Minecraft Block + Nhãn Khái niệm
+    // 7. Isometric Minecraft Blocks + Concept Labels
     ctx.font = '600 11px "JetBrains Mono", monospace';
     ctx.textBaseline = "middle";
 
@@ -850,6 +1094,9 @@ export function createWorld(canvas) {
         ctx.fillText(n.label, tx, ty);
       }
     }
+
+    // 8. Foreground Frame Hover Bloom FX (Voxel Flowers & Isometric Blocks)
+    renderFrameBloomFX(dt, t);
   }
 
   function loop(now) {

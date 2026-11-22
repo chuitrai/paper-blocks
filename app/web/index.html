@@ -1,114 +1,117 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- CSP cũng được nginx gửi dưới dạng header; thẻ meta giữ cho chế độ dev (WEB_DIR). -->
+  <!-- CSP is also sent by nginx as an HTTP header; meta tag is kept for local dev (WEB_DIR). -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://avatars.githubusercontent.com; frame-src 'self'; object-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'">
-  <title>Vũ Đình Ngọc Bảo — Portfolio &amp; Research</title>
+  <title>Vu Dinh Ngoc Bao — Research &amp; Engineering Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Cảnh nền 3D Voxel phong cách Vintage (Dòng sông chảy, nhà cổ có bánh xe nước, cầu đá rêu phong, Steve câu cá) -->
+  <!-- Animated 3D Minecraft Shader Valley Background & Interactive Isometric Block Knowledge Graph -->
   <div class="world-bg" aria-hidden="true">
-    <canvas id="world" tabindex="-1" aria-label="Cảnh nền 3D Vintage dòng sông chảy và kiến trúc cổ điển"></canvas>
+    <canvas id="world" tabindex="-1" aria-label="Animated 3D Minecraft Shader valley and Knowledge Graph"></canvas>
     <div class="world-veil"></div>
   </div>
 
-  <!-- Thanh điều hướng phong cách Học thuật / Khoa học (Nền trắng mờ) -->
+  <!-- Foreground Canvas Overlay for Frame Hover Animations (Voxel Flowers & Minecraft Blocks Blooming) -->
+  <canvas id="fx-canvas" class="fx-canvas" aria-hidden="true"></canvas>
+
+  <!-- Transparent Glass Navigation Bar -->
   <header class="bar">
     <div class="bar-inner">
       <a href="#about" class="brand">
-        <h1>Vũ Đình Ngọc Bảo <span>· HCMUS · Cloud &amp; AI</span></h1>
+        <h1>Vu Dinh Ngoc Bao <span>· HCMUS · Cloud &amp; AI</span></h1>
       </a>
       <span id="version" class="chip" hidden></span>
 
-      <nav class="nav-links" aria-label="Điều hướng các mục">
-        <a href="#about">Giới thiệu</a>
-        <a href="#news">Tin mới</a>
-        <a href="#papers">Công bố (Papers)</a>
-        <a href="#projects">Dự án</a>
-        <a href="#activities">Hoạt động &amp; Vlog</a>
-        <a href="#experience">Kinh nghiệm &amp; CV</a>
+      <nav class="nav-links" aria-label="Section navigation">
+        <a href="#about">About</a>
+        <a href="#news">News</a>
+        <a href="#papers">Publications</a>
+        <a href="#projects">Projects</a>
+        <a href="#activities">Activities &amp; Vlog</a>
+        <a href="#experience">Experience &amp; CV</a>
       </nav>
 
       <span class="spacer"></span>
 
-      <button id="btn-time" class="btn-ghost" type="button" title="Đổi bảng màu nền Đồ thị Tri thức">🌌 Đổi nền</button>
-      <button id="btn-scenic" class="btn-ghost" type="button" title="Ẩn tạm nội dung để tương tác với Đồ thị Tri thức">🕸️ Ngắm Đồ thị</button>
-      <button id="btn-new" class="btn primary" type="button" hidden>+ Thêm Paper</button>
+      <button id="btn-time" class="btn-ghost" type="button" title="Switch Shader lighting theme (Daylight / Sunset / Firefly Night)">🌌 Theme</button>
+      <button id="btn-scenic" class="btn-ghost" type="button" title="Temporarily hide cards to explore the interactive background">🕸️ World View</button>
+      <button id="btn-new" class="btn primary" type="button" hidden>+ New Paper</button>
 
       <span id="who" class="who" hidden>
         <img id="who-avatar" alt="" width="22" height="22">
         <b id="who-name"></b>
         <small id="who-role"></small>
       </span>
-      <a id="btn-login" class="btn primary" href="/api/v1/auth/github/login" hidden>Đăng nhập GitHub</a>
-      <button id="btn-logout" class="btn-ghost" type="button" hidden>Thoát</button>
+      <a id="btn-login" class="btn primary" href="/api/v1/auth/github/login" hidden>Sign in with GitHub</a>
+      <button id="btn-logout" class="btn-ghost" type="button" hidden>Sign out</button>
     </div>
   </header>
 
-  <!-- Khung nội dung chính theo bố cục chuẩn Học thuật / Khoa học (giống leevtruong.com) -->
+  <!-- Main Academic & Engineering Portfolio Container -->
   <main id="portfolio-main" class="academic-container">
 
     <!-- =================================================================== -->
-    <!-- 1. HỒ SƠ & TIỂU SỬ KHOA HỌC (BIOGRAPHY & PROFILE HEADER)           -->
+    <!-- 1. BIOGRAPHY & PROFILE HEADER                                       -->
     <!-- =================================================================== -->
     <section id="about" class="frosted-section reveal">
       <div class="bio-layout">
-        <!-- Cột trái: Ảnh chân dung, Chức danh & Liên kết Học thuật -->
+        <!-- Left Sidebar: Portrait, Affiliation & Academic Links -->
         <aside class="bio-sidebar">
           <div class="portrait-frame">
-            <img src="./assets/portrait.png" alt="Ảnh chân dung Vũ Đình Ngọc Bảo">
+            <img src="./assets/portrait.png" alt="Portrait of Vu Dinh Ngoc Bao">
           </div>
 
-          <h2 class="scholar-name">Vũ Đình Ngọc Bảo</h2>
-          <p class="scholar-title">Cử nhân Tài năng CNTT · Cloud, DevSecOps &amp; Systems Research</p>
-          <p class="scholar-affil">🏛 ĐH Khoa học Tự nhiên - ĐHQG TP.HCM (GPA 3.81/4.0)</p>
+          <h2 class="scholar-name">Vu Dinh Ngoc Bao</h2>
+          <p class="scholar-title">B.S. in Information Technology (Honors Program) · Cloud, DevSecOps &amp; AI Privacy</p>
+          <p class="scholar-affil">🏛 VNU-HCM, University of Science (HCMUS) · GPA 3.81/4.0</p>
 
           <div class="scholar-links">
             <a href="mailto:vudinhngocbao.work@gmail.com" class="s-link">📧 vudinhngocbao.work@gmail.com</a>
             <a href="https://github.com/chuitrai" target="_blank" rel="noopener noreferrer" class="s-link">💻 GitHub · chuitrai</a>
             <a href="https://www.linkedin.com/in/chuitrai29" target="_blank" rel="noopener noreferrer" class="s-link">🔗 LinkedIn · chuitrai29</a>
             <a href="https://www.tiktok.com/@banana_dancing_in_rain" target="_blank" rel="noopener noreferrer" class="s-link">🎬 TikTok · @banana_dancing_in_rain</a>
-            <a href="#papers" class="s-link">📄 Công bố (Papers)</a>
+            <a href="#papers" class="s-link">📄 Publications (Papers)</a>
             <a href="#experience" class="s-link">📋 Curriculum Vitae (CV)</a>
           </div>
         </aside>
 
-        <!-- Cột phải: Giới thiệu bản thân, Hướng nghiên cứu & Học vấn tóm tắt -->
+        <!-- Right Column: Biography, Research Interests & Education Summary -->
         <div class="bio-content">
-          <h2 class="section-heading">Giới thiệu (Biography)</h2>
+          <h2 class="section-heading">Biography</h2>
           <p>
-            Xin chào! Mình là <b>Vũ Đình Ngọc Bảo</b>, sinh viên năm 4 <b>Chương trình Cử nhân Tài năng ngành Công nghệ Thông tin</b> tại <b>Trường Đại học Khoa học Tự nhiên — ĐHQG TP.HCM (HCMUS)</b> với GPA tích luỹ <b>3.81/4.0</b>. Mình chuyên sâu về <b>Hạ tầng Đám mây (Kubernetes, AWS, GCP)</b>, <b>Bảo mật đường ống CI/CD (DevSecOps)</b>, <b>Privacy-preserving AI / Graph RAG</b> và <b>Backend mở rộng (Go, Python)</b>.
+            Hi! I am <b>Vu Dinh Ngoc Bao</b>, a senior student in the <b>Bachelor of Information Technology (Honors / Talented Program)</b> at the <b>University of Science, VNU-HCM (HCMUS)</b> with a cumulative GPA of <b>3.81/4.0</b>. My work focuses on <b>Cloud-Native Infrastructure (Kubernetes, AWS, GCP)</b>, <b>CI/CD Pipeline Security (DevSecOps)</b>, <b>Privacy-Preserving AI / Graph RAG</b>, and <b>Scalable Backend Systems (Go, Python)</b>.
           </p>
           <p>
-            Mình là tác giả chính (First Author) của hai công trình nghiên cứu gửi đăng tại <b>ACIIDS 2027</b> (nghiên cứu rò rỉ dữ liệu bệnh nhân trong Medical Graph RAG tại <b>SELab — HCMUS</b>) và <b>IEEE ICC 2027</b> (đo lường rò rỉ egress allowlist CI/CD khi thực tập tại <b>Cyber Information Security Lab — CCU, Đài Loan</b>). Ngoài ra mình từng làm <b>Backend Developer Intern tại BAO Insure</b>, học viên <b>Viettel Digital Talent (Cloud Track)</b> và chia sẻ góc nhìn công nghệ qua kênh TikTok <b>@banana_dancing_in_rain</b>.
+            I am the first author of two research papers submitted to <b>ACIIDS 2027</b> (investigating patient identifier leakage in Medical Graph RAG at <b>SELab — HCMUS</b>) and <b>IEEE ICC 2027</b> (measuring CI/CD egress-allowlist reachability during my research internship at the <b>Cyber Information Security Lab — National Chung Cheng University, Taiwan</b>). Previously, I worked as a <b>Backend Developer Intern at BAO Insure</b> and was a <b>Cloud Track Trainee at Viettel Digital Talent</b>. Outside the lab, I enjoy competing in hackathons and sharing tech/research stories on TikTok (<b>@banana_dancing_in_rain</b>).
           </p>
 
           <div class="bio-two-cols">
             <div>
-              <h3>Hướng Nghiên cứu &amp; Chuyên môn</h3>
+              <h3>Research Interests &amp; Focus</h3>
               <ul class="clean-list">
-                <li><b>CI/CD Security &amp; DevSecOps:</b> Egress allowlist trên GitHub Actions &amp; Kubernetes, GitOps (ArgoCD), Helm, BuildKit.</li>
-                <li><b>Cloud-Native &amp; Backend:</b> RESTful APIs (Go, Python), Docker, AWS &amp; GCP, Observability (Prometheus, Grafana, EFK).</li>
-                <li><b>AI &amp; Applied Systems:</b> Truy vấn video đa phương thức (TransNet, FAISS); đang nghiên cứu LLMs, RAG &amp; NLP.</li>
+                <li><b>CI/CD Security &amp; DevSecOps:</b> Egress allowlists on GitHub Actions &amp; Kubernetes, GitOps (ArgoCD), Helm, BuildKit.</li>
+                <li><b>Privacy-Preserving AI &amp; Graph RAG:</b> PII leakage analysis, graph-derived masking (P2q), provenance pruning (P4), LLMs &amp; NLP.</li>
+                <li><b>Cloud-Native &amp; Backend:</b> High-performance RESTful APIs (Go, Python), Docker, AWS &amp; GCP, Observability (Prometheus, Grafana, EFK).</li>
               </ul>
             </div>
 
             <div>
-              <h3>Học vấn &amp; Học bổng Tiêu biểu</h3>
+              <h3>Education &amp; Honors</h3>
               <ul class="edu-mini-list">
                 <li>
-                  <b>ĐH Khoa học Tự nhiên — ĐHQG TP.HCM</b> (2023 – 2027)
-                  <span>Cử nhân Tài năng CNTT · GPA 3.81/4.0 · TOEIC 825 L&amp;R / 270 S&amp;W</span>
+                  <b>University of Science — VNU-HCM</b> (2023 – 2027)
+                  <span>B.S. Honors Program in IT · GPA 3.81/4.0 · TOEIC 825 L&amp;R / 270 S&amp;W</span>
                 </li>
                 <li>
-                  <b>Học bổng &amp; Danh hiệu</b> (2025 – 2026)
+                  <b>Scholarships &amp; Awards</b> (2025 – 2026)
                   <span>2026 CCU/CoE International Internship · KMS Excellence 2025 · Viettel Digital Talent 2025 &amp; 2026</span>
                 </li>
               </ul>
@@ -119,84 +122,84 @@
     </section>
 
     <!-- =================================================================== -->
-    <!-- 2. TIN MỚI & CỘT MỐC NỔI BẬT (NEWS & UPDATES)                       -->
+    <!-- 2. NEWS & HIGHLIGHTS                                                -->
     <!-- =================================================================== -->
     <section id="news" class="frosted-section reveal">
-      <h2 class="section-heading">Tin mới &amp; Cập nhật (News)</h2>
+      <h2 class="section-heading">News &amp; Highlights</h2>
       <ul class="academic-news-list">
         <li>
           <span class="news-date">11 / 2026</span>
           <div class="news-body">
-            Hoàn thiện công trình nghiên cứu <b>"Graph-Derived Controls for Patient Identifier Leakage in Medical Graph RAG"</b> (tác giả chính, cùng nhóm nghiên cứu <b>SELab — HCMUS</b>), đề xuất cơ chế <b>P2q</b> và <b>P4</b> giảm rò rỉ định danh bệnh nhân về 0–1.2% mà không cần mô hình phát hiện tại query time (gửi đăng <b>ACIIDS 2027</b>).
+            Completed first-author research paper <b>"Graph-Derived Controls for Patient Identifier Leakage in Medical Graph RAG"</b> with <b>SELab — HCMUS</b>, proposing <b>P2q</b> and <b>P4</b> controls that lower patient-naming leakage to 1.2% and eliminate patient-diagnosis linkage (0%) without query-time detection models (submitted to <b>ACIIDS 2027</b>).
           </div>
         </li>
         <li>
           <span class="news-date">10 / 2026</span>
           <div class="news-body">
-            Hoàn thành kỳ thực tập nghiên cứu tại <b>Cyber Information Security Lab — National Chung Cheng University (Đài Loan)</b> và gửi bài báo <b>"Measuring Egress-Allowlist Reachability in GitHub Actions from Multi-Source CI Data" (EgressGap)</b> cùng PGS.TS. Nguyễn Văn Linh tới hội nghị <b>IEEE ICC 2027 (SAC-BigData)</b>.
+            Completed my summer research internship at the <b>Cyber Information Security Lab — National Chung Cheng University (Taiwan)</b> and submitted <b>"Measuring Egress-Allowlist Reachability in GitHub Actions from Multi-Source CI Data" (EgressGap)</b> with Assoc. Prof. Van-Linh Nguyen to <b>IEEE ICC 2027 (SAC-BigData)</b>.
           </div>
         </li>
         <li>
           <span class="news-date">07 / 2026</span>
           <div class="news-body">
-            Hoàn thành kỳ thực tập <b>Backend Developer Intern tại BAO Insure (InsurTech)</b>: xây dựng RESTful APIs tích hợp liên hệ thống, quản lý cross-schema MySQL, container hoá Docker và triển khai hệ thống Huly trên <b>Google Cloud Platform (GCP)</b>.
+            Completed <b>Backend Developer Internship at BAO Insure (InsurTech)</b>: engineered secure RESTful APIs &amp; middleware, multi-schema MySQL transaction logging, Docker deployment pipelines, and deployed Huly on <b>Google Cloud Platform (GCP)</b>.
           </div>
         </li>
         <li>
           <span class="news-date">2025 – 2026</span>
           <div class="news-body">
-            Nhận học bổng <b>KMS Excellence Scholarship 2025</b>, học bổng <b>Accelerate Vietnam Digital Talent (Viettel)</b>, và đạt <b>Giải Triển vọng (Top 30 / 2.600+ đội thi)</b> tại cuộc thi quốc tế <b>Data For Life 2025</b> (Bộ Công An) với dự án <b>AquaSafe</b>.
+            Received the <b>KMS Excellence Scholarship 2025</b>, the <b>Accelerate Vietnam Digital Talent Scholarship (Viettel)</b>, and won the <b>Promising Award (Top 30 / 2,600+ teams)</b> at the <b>Data For Life 2025</b> international competition (Ministry of Public Security) with <b>AquaSafe</b>.
           </div>
         </li>
         <li>
           <span class="news-date">2024</span>
           <div class="news-body">
-            Lọt vào <b>Chung kết (Finalist) AI Challenge TP.HCM 2024</b> (chủ đề <i>"Event retrieval from visual data"</i>), tham gia <b>ICPC Southern Provincial Round 2024</b> và <b>NET Challenge 2024</b> (UIT - ĐHQG TP.HCM).
+            <b>Finalist</b> at <b>The 5th AI Challenge Ho Chi Minh City 2024</b> (theme: <i>"Event retrieval from visual data"</i>); competed in the <b>ICPC Southern Provincial Round 2024</b> and <b>NET Challenge 2024</b> (UIT - VNU-HCM).
           </div>
         </li>
       </ul>
     </section>
 
     <!-- =================================================================== -->
-    <!-- 3. CÔNG BỐ KHOA HỌC & BÁO CÁO KỸ THUẬT (SELECTED PUBLICATIONS)      -->
+    <!-- 3. SELECTED PUBLICATIONS & TECHNICAL REPORTS                        -->
     <!-- =================================================================== -->
     <section id="papers" class="frosted-section reveal">
       <div class="section-head-row">
         <div>
-          <h2 class="section-heading">Công bố Khoa học &amp; Báo cáo Kỹ thuật (Publications)</h2>
-          <p class="section-sub">Danh sách các bài báo, báo cáo nghiên cứu kèm toàn văn PDF, mã nguồn GitHub và thảo luận học thuật.</p>
+          <h2 class="section-heading">Selected Publications &amp; Technical Reports</h2>
+          <p class="section-sub">Research papers and technical reports with embedded full-text PDF viewer, GitHub repositories, and academic discussions.</p>
         </div>
         <p id="stats" class="stats-badge" aria-live="polite"></p>
       </div>
 
       <div class="toolbar">
-        <input id="q" type="search" maxlength="100" placeholder="Tìm kiếm bài báo theo tiêu đề, từ khoá hoặc nội dung tóm tắt..." aria-label="Tìm paper">
+        <input id="q" type="search" maxlength="100" placeholder="Search publications by title, keyword, or abstract..." aria-label="Search papers">
       </div>
-      <div id="tags" class="tag-filter" aria-label="Lọc theo từ khoá"></div>
-      <ol id="list" class="pub-list" aria-label="Danh sách công bố khoa học"></ol>
+      <div id="tags" class="tag-filter" aria-label="Filter by keyword"></div>
+      <ol id="list" class="pub-list" aria-label="List of publications"></ol>
     </section>
 
     <!-- =================================================================== -->
-    <!-- 4. DỰ ÁN NGHIÊN CỨU & KỸ THUẬT (FEATURED PROJECTS)                  -->
+    <!-- 4. FEATURED RESEARCH & ENGINEERING PROJECTS                         -->
     <!-- =================================================================== -->
     <section id="projects" class="frosted-section reveal">
-      <h2 class="section-heading">Dự án Nghiên cứu &amp; Kỹ thuật (Featured Projects)</h2>
-      <p class="section-sub">Các hệ thống phần mềm và hạ tầng đám mây được thiết kế, đo kiểm và vận hành thực tế.</p>
+      <h2 class="section-heading">Featured Research &amp; Engineering Projects</h2>
+      <p class="section-sub">Research frameworks, cloud-native platforms, and applied AI systems built and evaluated in real environments.</p>
 
       <div class="academic-item-list">
         <!-- Project 0: GraphRAG Privacy (ACIIDS 2027) -->
         <article class="academic-row">
           <div class="row-thumb">
-            <img src="./assets/graphrag-overview.png" alt="Kiến trúc bảo vệ định danh bệnh nhân trong Medical Graph RAG (P2q / P4)">
+            <img src="./assets/graphrag-overview.png" alt="Graph-Derived Controls for Patient Identifier Leakage in Medical Graph RAG (P2q / P4)">
           </div>
           <div class="row-body">
             <h3>Graph-Derived Controls for Patient Identifier Leakage in Medical Graph RAG</h3>
-            <p class="row-authors"><b>Vai trò:</b> First Author · <b>Đơn vị:</b> SELab — ĐH Khoa học Tự nhiên, ĐHQG-HCM · <b>Hội nghị:</b> ACIIDS 2027</p>
+            <p class="row-authors"><b>Role:</b> First Author · <b>Lab:</b> SELab — University of Science, VNU-HCM · <b>Venue:</b> ACIIDS 2027</p>
             <p class="row-desc">
-              Xây dựng hệ thống đánh giá và kiểm soát rò rỉ định danh bệnh nhân (PII) trên LightRAG &amp; Plain RAG. Đề xuất bộ lọc <b>P2q</b> (từ điển thực thể từ đồ thị) và <b>P4</b> (cắt tỉa theo nguồn gốc + băm ID theo truy vấn), đưa liên kết bệnh nhân-chẩn đoán về <b>0%</b>.
+              Measured stage-by-stage PII leakage across LightRAG and Plain RAG on medical dialogues using synthetic canary patients. Designed <b>P2q</b> (graph-derived person dictionary + age coarsening, filtering contexts in 33 ms) and <b>P4</b> (provenance document pruning + per-query ID hashing), reducing patient-diagnosis linkage and cited-ID join attacks to <b>0%</b>.
             </p>
             <div class="tags">
-              <span>Graph RAG</span><span>LightRAG</span><span>Privacy-preserving AI</span><span>ACIIDS 2027</span>
+              <span>Graph RAG</span><span>LightRAG</span><span>Privacy-Preserving AI</span><span>ACIIDS 2027</span>
             </div>
           </div>
         </article>
@@ -204,16 +207,16 @@
         <!-- Project 1: EgressGap (CCU Taiwan / IEEE ICC 2027) -->
         <article class="academic-row">
           <div class="row-thumb">
-            <img src="./assets/egressgap-overview.png" alt="Pipeline đo lường Egress-Allowlist Reachability trong GitHub Actions (EgressGap)">
+            <img src="./assets/egressgap-overview.png" alt="Measuring Egress-Allowlist Reachability in GitHub Actions (EgressGap)">
           </div>
           <div class="row-body">
-            <h3>EgressGap — Phân tích Rò rỉ Dữ liệu qua Egress Allowlist trong CI/CD</h3>
-            <p class="row-authors"><b>Vai trò:</b> First Author · <b>Đơn vị:</b> Cyber Information Security Lab, CCU (Đài Loan) · <a href="https://github.com/chuitrai/EgressGap" target="_blank" rel="noopener noreferrer">github.com/chuitrai/EgressGap</a></p>
+            <h3>EgressGap — Measuring Egress-Allowlist Reachability in GitHub Actions</h3>
+            <p class="row-authors"><b>Role:</b> First Author · <b>Lab:</b> Cyber Information Security Lab, CCU (Taiwan) · <a href="https://github.com/chuitrai/EgressGap" target="_blank" rel="noopener noreferrer">github.com/chuitrai/EgressGap</a></p>
             <p class="row-desc">
-              Phân tích 7.137 egress allowlist trên 1.358 repo GitHub Actions dùng Harden-Runner, kết hợp dữ liệu workflow, sở hữu IP/co-tenancy và log chạy CI. Đồng tác giả bài báo khoa học cùng PGS.TS. Nguyễn Văn Linh (gửi đăng <b>IEEE ICC 2027</b>).
+              Analyzed 7,137 enforcing Harden-Runner allowlists across 1,358 public GitHub Actions repositories by fusing workflow static rules, IP co-tenancy/abuse catalogs, and public CI DNS logs. Demonstrated that 56.7% of policies admit co-tenant or exfiltration channels and static tightening breaks 98.4% of builds (submitted to <b>IEEE ICC 2027</b>).
             </p>
             <div class="tags">
-              <span>CI/CD Security</span><span>GitHub Actions</span><span>Kubernetes</span><span>IEEE ICC 2027</span>
+              <span>CI/CD Security</span><span>GitHub Actions</span><span>Network Measurement</span><span>IEEE ICC 2027</span>
             </div>
           </div>
         </article>
@@ -221,13 +224,13 @@
         <!-- Project 2: AquaSafe (Data For Life 2025) -->
         <article class="academic-row">
           <div class="row-thumb">
-            <img class="photo" src="./assets/data4life.jpg" alt="Đội thi AquaSafe tại Data For Life 2025">
+            <img class="photo" src="./assets/data4life.jpg" alt="AquaSafe team at Data For Life 2025">
           </div>
           <div class="row-body">
-            <h3>AquaSafe — Bản đồ Ngập lụt theo Mức độ &amp; Dự báo Thời gian thực</h3>
-            <p class="row-authors"><b>Giải thưởng:</b> Giải Triển vọng (Promising Award) · Data For Life 2025 (Bộ Công An) · <a href="https://github.com/chuitrai/AquaSafe_FE" target="_blank" rel="noopener noreferrer">github.com/chuitrai/AquaSafe_FE</a></p>
+            <h3>AquaSafe — Interactive Flood Severity Map &amp; Real-Time Prediction</h3>
+            <p class="row-authors"><b>Award:</b> Promising Award (Top 30 / 2,600+ teams) · Data For Life 2025 (Ministry of Public Security) · <a href="https://github.com/chuitrai/AquaSafe_FE" target="_blank" rel="noopener noreferrer">github.com/chuitrai/AquaSafe_FE</a></p>
             <p class="row-desc">
-              Xây dựng bản đồ web trực quan hiển thị mức độ ngập lụt và cảnh báo dự báo phục vụ cộng đồng, giúp đội thi lọt vào Top 30 xuất sắc nhất trong hơn 2.600 đội dự thi quốc tế.
+              Developed a web-based geospatial mapping platform visualizing real-time flood severity levels and predictive alerts to assist citizen safety and disaster response, winning a Promising Award among over 2,600 international entries.
             </p>
             <div class="tags">
               <span>React</span><span>GIS / Web Map</span><span>Data For Life 2025</span><span>Promising Award</span>
@@ -238,7 +241,7 @@
         <!-- Project 3: Viettel Digital Talent Cloud-Native Platform -->
         <article class="academic-row">
           <div class="row-thumb">
-            <svg viewBox="0 0 220 140" role="img" aria-label="Kiến trúc Kubernetes & GitOps">
+            <svg viewBox="0 0 220 140" role="img" aria-label="Kubernetes & GitOps Architecture">
               <rect width="220" height="140" rx="8" fill="#f1f5f9"/>
               <rect x="14" y="16" width="192" height="108" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
               <rect x="26" y="32" width="52" height="32" rx="4" fill="#dceefb" stroke="#3b82f6"/>
@@ -255,9 +258,9 @@
           </div>
           <div class="row-body">
             <h3>Cloud-Native Application Deployment &amp; Observability Platform</h3>
-            <p class="row-authors"><b>Đơn vị:</b> Viettel Digital Talent Project · <a href="https://github.com/chuitrai/VDT_Final_Project" target="_blank" rel="noopener noreferrer">github.com/chuitrai/VDT_Final_Project</a></p>
+            <p class="row-authors"><b>Program:</b> Viettel Digital Talent Project · <a href="https://github.com/chuitrai/VDT_Final_Project" target="_blank" rel="noopener noreferrer">github.com/chuitrai/VDT_Final_Project</a></p>
             <p class="row-desc">
-              Tự động hoá dựng cụm Kubernetes (Kubeadm, Vagrant, Ansible), xây dựng đường ống CI/CD với Jenkins, triển khai GitOps qua Helm &amp; ArgoCD, đồng thời thiết lập giám sát Prometheus + Grafana và tập trung log với EFK Stack.
+              Automated Kubernetes cluster provisioning using Kubeadm, Vagrant, and Ansible; built production-grade Jenkins CI/CD pipelines and multi-source Helm + ArgoCD GitOps workflows with end-to-end Prometheus, Grafana, and EFK Stack observability.
             </p>
             <div class="tags">
               <span>Kubernetes</span><span>Helm</span><span>ArgoCD GitOps</span><span>Ansible</span><span>Prometheus &amp; EFK</span>
@@ -280,13 +283,13 @@
             </svg>
           </div>
           <div class="row-body">
-            <h3>Hệ thống Truy vấn Video Quy mô lớn (AIC 2024) &amp; Proxy Server C++</h3>
-            <p class="row-authors"><b>Mã nguồn:</b> <a href="https://github.com/chuitrai/AIC_Challenge" target="_blank" rel="noopener noreferrer">AIC_Challenge</a> · <a href="https://github.com/chuitrai/Proxy_server" target="_blank" rel="noopener noreferrer">Proxy_server</a> · <a href="https://github.com/chuitrai/paper-blocks" target="_blank" rel="noopener noreferrer">paper-blocks</a></p>
+            <h3>Large-Scale Multimodal Video Retrieval (AIC 2024) &amp; C++ Proxy Server</h3>
+            <p class="row-authors"><b>Repositories:</b> <a href="https://github.com/chuitrai/AIC_Challenge" target="_blank" rel="noopener noreferrer">AIC_Challenge</a> · <a href="https://github.com/chuitrai/Proxy_server" target="_blank" rel="noopener noreferrer">Proxy_server</a> · <a href="https://github.com/chuitrai/paper-blocks" target="_blank" rel="noopener noreferrer">paper-blocks</a></p>
             <p class="row-desc">
-              Xây dựng hệ thống tìm kiếm sự kiện video bằng văn bản hoặc ảnh (TransNet + FAISS + Streamlit) lọt vào <b>Chung kết AI Challenge TP.HCM 2024</b>; tự cài đặt HTTP/HTTPS Proxy Server từ đầu bằng C++ (Socket, lọc domain/IP); và nền tảng <b>Paper Blocks</b> (Go 1.24 + SQLite WAL + Three.js WebGL).
+              Engineered a text-to-video and image-to-video retrieval system (TransNet keyframe extraction + FAISS vector search + Streamlit) that reached the <b>Final Round of AI Challenge HCMC 2024</b>; implemented a multithreaded HTTP/HTTPS Proxy Server from scratch in C++; and built <b>Paper Blocks</b> (Go 1.24 + SQLite WAL).
             </p>
             <div class="tags">
-              <span>Python</span><span>TransNet &amp; FAISS</span><span>C++ Sockets</span><span>Go 1.24</span><span>WebGL</span>
+              <span>Python</span><span>TransNet &amp; FAISS</span><span>C++ Sockets</span><span>Go 1.24</span><span>SQLite WAL</span>
             </div>
           </div>
         </article>
@@ -294,65 +297,64 @@
     </section>
 
     <!-- =================================================================== -->
-    <!-- 5. HOẠT ĐỘNG, SỰ KIỆN, VLOG & TIKTOK (ACTIVITIES & MEDIA)           -->
+    <!-- 5. ACADEMIC ACTIVITIES, COMPETITIONS & CREATIVE MEDIA (TIKTOK/VLOG) -->
     <!-- =================================================================== -->
     <section id="activities" class="frosted-section reveal">
       <div class="section-head-row">
         <div>
-          <h2 class="section-heading">Hoạt động Học thuật, Sự kiện &amp; Góc Sáng tạo (Vlog / TikTok)</h2>
-          <p class="section-sub">Lưu giữ các khoảnh khắc thuyết trình hội thảo, tham gia cuộc thi công nghệ và lan toả năng lượng qua các video ngắn, vlog đời sống nghiên cứu.</p>
+          <h2 class="section-heading">Academic Activities, Competitions &amp; Creative Media (Vlog / TikTok)</h2>
+          <p class="section-sub">Highlights from international research internships, hackathons, student leadership, and short-form tech storytelling.</p>
         </div>
 
-        <div class="filter-pills" role="tablist" aria-label="Lọc hoạt động">
-          <button class="f-pill on" data-media="all" type="button">Tất cả</button>
-          <button class="f-pill" data-media="event" type="button">🏛 Sự kiện &amp; Hội thảo</button>
+        <div class="filter-pills" role="tablist" aria-label="Filter activities">
+          <button class="f-pill on" data-media="all" type="button">All</button>
+          <button class="f-pill" data-media="event" type="button">🏛 Research &amp; Competitions</button>
           <button class="f-pill" data-media="vlog" type="button">🎬 Video Vlog &amp; TikTok</button>
         </div>
       </div>
 
-      <!-- Lưới Hoạt động & Sự kiện (Ảnh + Thông tin rõ ràng, trang nhã) -->
       <div class="media-showcase-grid">
-        <!-- Hoạt động 1: CCU Taiwan -->
+        <!-- Activity 1: CCU Taiwan -->
         <article class="media-card" data-category="event">
           <div class="media-thumb">
-            <img src="./assets/teep-taiwan.jpg" alt="Thực tập nghiên cứu TEEP tại National Chung Cheng University, Đài Loan">
-            <span class="media-badge">Nghiên cứu Quốc tế · TEEP 2026</span>
+            <img src="./assets/teep-taiwan.jpg" alt="Research Internship at National Chung Cheng University, Taiwan">
+            <span class="media-badge">International Research · TEEP 2026</span>
           </div>
           <div class="media-info">
-            <h3>Thực tập Nghiên cứu tại National Chung Cheng University (Đài Loan)</h3>
-            <p>Nhận học bổng quốc tế CCU/CoE 2026 (TEEP), nghiên cứu bảo mật egress allowlist trong CI/CD cùng PGS.TS. Nguyễn Văn Linh và hoàn thiện bài báo gửi IEEE ICC 2027.</p>
+            <h3>Research Internship at National Chung Cheng University (Taiwan)</h3>
+            <p>Awarded the 2026 CCU/CoE International Internship Scholarship (TEEP) at the Cyber Information Security Lab, researching CI/CD egress-allowlist security with Assoc. Prof. Van-Linh Nguyen (submitted to IEEE ICC 2027).</p>
           </div>
         </article>
 
-        <!-- Hoạt động 2: Data For Life & AI Challenge & ICPC -->
+        <!-- Activity 2: Data For Life & AI Challenge & ICPC -->
         <article class="media-card" data-category="event">
           <div class="media-thumb">
-            <img src="./assets/data4life.jpg" alt="Đạt Giải Triển vọng cuộc thi Data For Life 2025">
-            <span class="media-badge">Giải Triển vọng · Data For Life 2025</span>
+            <img src="./assets/data4life.jpg" alt="Promising Award at Data For Life 2025">
+            <span class="media-badge">Promising Award · Data For Life 2025</span>
           </div>
           <div class="media-info">
-            <h3>Giải Triển vọng Data For Life 2025 &amp; Chung kết AI Challenge TP.HCM</h3>
-            <p>Đạt Giải Triển vọng Data For Life 2025 (Bộ Công An, Top 30/2.600+), lọt Chung kết AI Challenge TP.HCM 2024, thi đấu ICPC Southern 2024, VPBank Hackathon 2025 &amp; NET Challenge 2024.</p>
+            <h3>Data For Life 2025 Promising Award &amp; AI Challenge HCMC Finalist</h3>
+            <p>Won the Promising Award (Top 30 / 2,600+ teams) at Data For Life 2025 (Ministry of Public Security), reached the Final Round of AI Challenge HCMC 2024, and competed in ICPC Southern 2024, VPBank Technology Hackathon 2025 &amp; NET Challenge 2024.</p>
           </div>
         </article>
 
-        <!-- Hoạt động 3: Viettel Digital Talent & Cộng đồng -->
+        <!-- Activity 3: Viettel Digital Talent & Community -->
         <article class="media-card" data-category="event">
           <div class="media-thumb">
-            <svg viewBox="0 0 360 200" role="img" aria-label="Viettel Digital Talent & Hoạt động Cộng đồng">
+            <svg viewBox="0 0 360 200" role="img" aria-label="Viettel Digital Talent & Community">
               <rect width="360" height="200" fill="#e5ece6"/>
               <rect x="18" y="18" width="324" height="164" rx="8" fill="#ffffff" stroke="#c5d6c8"/>
               <rect x="34" y="34" width="142" height="24" rx="4" fill="#2f5e4e"/>
               <text x="44" y="50" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="10">TALENT &amp; COMMUNITY</text>
-              <text x="34" y="88" fill="#1e293b" font-family="serif" font-weight="bold" font-size="17.5">Viettel Talent &amp; Cộng đồng</text>
-              <text x="34" y="114" fill="#475569" font-family="sans-serif" font-size="12.5">Thanh niên Tiên tiến 2025 · Phó lớp trưởng HT</text>
-              <text x="34" y="152" fill="#2f5e4e" font-family="monospace" font-size="11.5">🩸 Hiến máu 5 lần · Gia sư từ năm nhất</text>
+              <text x="34" y="88" fill="#1e293b" font-family="serif" font-weight="bold" font-size="17.5">Viettel Talent &amp; Leadership</text>
+              <text x="34" y="114" fill="#475569" font-family="sans-serif" font-size="12.5">Advanced Youth Title 2025 · Vice Class Monitor</text>
+              <text x="34" y="152" fill="#2f5e4e" font-family="monospace" font-size="11.5">🩸 5× Blood Donor · Tutor since Freshman Year</text>
             </svg>
-            <span class="media-badge">Cộng đồng &amp; Đào tạo · 2023–2026</span>
+            <span class="media-badge">Leadership &amp; Community · 2023–2026</span>
           </div>
           <div class="media-info">
-            <h3>Viettel Digital Talent &amp; Hoạt động Sinh viên HCMUS</h3>
-            <p>Học viên Cloud Track Viettel Digital Talent (2024–2026), Phó lớp trưởng học tập (Giấy khen Hoàn thành xuất sắc nhiệm vụ), Thanh niên tiên tiến làm theo lời Bác 2025 &amp; hiến máu tình nguyện 5 lần.</p>
+            <h3>Viettel Digital Talent &amp; HCMUS Student Community</h3>
+            <p>Cloud Track Trainee at Viettel Digital Talent (2024–2026), Vice Class Monitor for Academic Affairs (Certificate of Excellent Completion), "Advanced Youth Following Uncle Ho's Example 2025" in research &amp; learning, and 5-time voluntary blood donor.</p>
           </div>
         </article>
 
@@ -366,18 +368,18 @@
               <polygon points="294,88 294,112 314,100" fill="#ffffff"/>
               <rect x="34" y="34" width="120" height="24" rx="4" fill="#8c5332"/>
               <text x="44" y="50" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="10">🎬 VLOG &amp; TIKTOK</text>
-              <text x="34" y="88" fill="#1e293b" font-family="serif" font-weight="bold" font-size="17.5">Hành trình Nghiên cứu &amp; Tech</text>
-              <text x="34" y="114" fill="#475569" font-family="sans-serif" font-size="12.5">Chia sẻ thực tập Đài Loan, DevOps &amp; Paper 60s</text>
-              <text x="34" y="152" fill="#8c5332" font-family="monospace" font-size="11.5">▶ Chia sẻ kiến thức Cloud, K8s &amp; AI</text>
+              <text x="34" y="88" fill="#1e293b" font-family="serif" font-weight="bold" font-size="17.5">Research &amp; Life Vlogs</text>
+              <text x="34" y="114" fill="#475569" font-family="sans-serif" font-size="12.5">Taiwan Internship, Hackathons &amp; Cloud/AI</text>
+              <text x="34" y="152" fill="#8c5332" font-family="monospace" font-size="11.5">▶ @banana_dancing_in_rain</text>
             </svg>
             <span class="media-badge">Video Vlog &amp; TikTok</span>
           </div>
           <div class="media-info">
-            <h3>Góc Sáng tạo: Tech Vlog &amp; TikTok (<a href="https://www.tiktok.com/@banana_dancing_in_rain" target="_blank" rel="noopener noreferrer">@banana_dancing_in_rain</a>)</h3>
-            <p>Ghi lại trải nghiệm thực tập quốc tế tại Đài Loan, hậu trường thi đấu Hackathon và chia sẻ năng lượng tích cực cùng kiến thức Cloud-Native, Kubernetes &amp; bảo mật AI/CI-CD.</p>
+            <h3>Creative Corner: Tech Vlog &amp; TikTok (<a href="https://www.tiktok.com/@banana_dancing_in_rain" target="_blank" rel="noopener noreferrer">@banana_dancing_in_rain</a>)</h3>
+            <p>Documenting my international research internship in Taiwan, behind-the-scenes hackathon moments, and approachable insights on Cloud-Native, Kubernetes &amp; AI/CI-CD security.</p>
             <div class="media-links">
-              <a href="https://www.tiktok.com/@banana_dancing_in_rain/video/7653198068262767879" target="_blank" rel="noopener noreferrer">▶ Video Tiêu biểu #1</a>
-              <a href="https://www.tiktok.com/@banana_dancing_in_rain/photo/7699641199908392200" target="_blank" rel="noopener noreferrer">📸 Bài đăng Tiêu biểu #2</a>
+              <a href="https://www.tiktok.com/@banana_dancing_in_rain/video/7653198068262767879" target="_blank" rel="noopener noreferrer">▶ Featured Video #1</a>
+              <a href="https://www.tiktok.com/@banana_dancing_in_rain/photo/7699641199908392200" target="_blank" rel="noopener noreferrer">📸 Featured Post #2</a>
             </div>
           </div>
         </article>
@@ -385,65 +387,65 @@
     </section>
 
     <!-- =================================================================== -->
-    <!-- 6. KINH NGHIỆM, HỌC VẤN & KỸ NĂNG (EXPERIENCE & SKILLS CV)          -->
+    <!-- 6. EXPERIENCE, EDUCATION & TECHNICAL SKILLS (CV SUMMARY)            -->
     <!-- =================================================================== -->
     <section id="experience" class="frosted-section reveal">
-      <h2 class="section-heading">Hành trình Kinh nghiệm &amp; Năng lực Chuyên môn (CV Summary)</h2>
+      <h2 class="section-heading">Experience, Education &amp; Technical Skills (CV Summary)</h2>
 
       <div class="cv-grid">
         <div>
-          <h3 class="cv-sub">Kinh nghiệm Làm việc &amp; Nghiên cứu</h3>
+          <h3 class="cv-sub">Research &amp; Industry Experience</h3>
           <div class="cv-timeline">
             <div class="cv-item">
               <div class="cv-period">07/2026 — 09/2026</div>
-              <h4>Research Intern · Cyber Information Security Lab, CCU (Đài Loan)</h4>
-              <p>Nghiên cứu bảo mật egress allowlist trong CI/CD (GitHub Actions, Kubernetes), đo lường lượng dữ liệu có thể rò rỉ và đồng tác giả bài báo gửi <b>IEEE ICC 2027</b> cùng PGS.TS. Nguyễn Văn Linh.</p>
+              <h4>Research Intern · Cyber Information Security Lab, CCU (Taiwan)</h4>
+              <p>Investigated egress allowlists in CI/CD pipelines (GitHub Actions, Kubernetes), measured residual data reachability across 7,137 policies, and co-authored a first-author paper submitted to <b>IEEE ICC 2027</b> with Assoc. Prof. Van-Linh Nguyen.</p>
             </div>
             <div class="cv-item">
               <div class="cv-period">10/2025 — 07/2026</div>
               <h4>Backend Developer Intern · BAO Insure (InsurTech Startup)</h4>
-              <p>Xây dựng RESTful APIs &amp; middleware xác thực/logging, xử lý cross-schema MySQL, container hoá Docker đa môi trường và tuỳ biến triển khai Huly trên Google Cloud Platform (GCP).</p>
+              <p>Built RESTful APIs &amp; authentication/logging middleware for cross-system integrations, managed cross-schema MySQL transaction logging, containerized multi-environment releases with Docker, and customized/deployed Huly on Google Cloud Platform (GCP).</p>
             </div>
             <div class="cv-item">
               <div class="cv-period">2024 — 2026</div>
               <h4>Cloud Track Trainee · Viettel Digital Talent</h4>
-              <p>Nghiên cứu và triển khai hệ thống CI/CD, Infrastructure as Code (Ansible, Terraform), Kubernetes, GitOps (ArgoCD, Helm) và Observability (Prometheus, Grafana, EFK).</p>
+              <p>Researched and implemented CI/CD pipelines, Infrastructure as Code (Ansible, Terraform), Kubernetes cluster automation, GitOps (ArgoCD, Helm), and observability stacks (Prometheus, Grafana, EFK).</p>
             </div>
             <div class="cv-item">
               <div class="cv-period">2023 — 2027</div>
-              <h4>Cử nhân Tài năng CNTT · ĐH Khoa học Tự nhiên - ĐHQG TP.HCM</h4>
-              <p>GPA tích luỹ <b>3.81/4.0</b>. Giải Nhì HSG Tin học cấp tỉnh Phú Yên; Phó lớp trưởng học tập 2024–2025.</p>
+              <h4>B.S. in Information Technology (Honors Program) · VNU-HCM, University of Science</h4>
+              <p>Cumulative GPA: <b>3.81/4.0</b>. First-author researcher in Medical Graph RAG Privacy at SELab (submitted to <b>ACIIDS 2027</b>); Second Prize in Phu Yen Provincial Excellent Student Contest in Informatics.</p>
             </div>
           </div>
         </div>
 
         <div>
-          <h3 class="cv-sub">Kỹ năng Kỹ thuật &amp; Chứng chỉ</h3>
+          <h3 class="cv-sub">Technical Skills &amp; Certifications</h3>
           <dl class="skills-table">
-            <dt>Ngôn ngữ &amp; Backend Frameworks</dt>
-            <dd>Go (Golang), Python, C++, Java, JavaScript, SQL · Gin, Flask, React, Microservices, RESTful API, OOP.</dd>
+            <dt>Languages &amp; Backend Frameworks</dt>
+            <dd>Go (Golang), Python, C++, Java, JavaScript, SQL · Gin, Flask, React, Microservices, RESTful APIs, OOP.</dd>
 
-            <dt>DevOps, Cloud &amp; Bảo mật CI/CD</dt>
-            <dd>AWS, GCP (GKE, BigQuery, Pub/Sub), Kubernetes, Helm, ArgoCD, Jenkins, Docker, Ansible, Terraform, Egress Security.</dd>
+            <dt>DevOps, Cloud &amp; CI/CD Security</dt>
+            <dd>AWS, GCP (GKE, BigQuery, Pub/Sub), Kubernetes, Helm, ArgoCD, Jenkins, Docker, Ansible, Terraform, Egress Filtering &amp; Hardening.</dd>
 
-            <dt>Giám sát, Dữ liệu &amp; AI</dt>
-            <dd>Prometheus, Grafana, EFK Stack (Elasticsearch, Fluentd, Kibana), MySQL, SQLite WAL · FAISS, TransNet, đang học LLMs, RAG &amp; NLP.</dd>
+            <dt>Observability, Data &amp; AI</dt>
+            <dd>Prometheus, Grafana, EFK Stack (Elasticsearch, Fluentd, Kibana), MySQL, SQLite WAL · LightRAG, GraphRAG, FAISS, TransNet, LLMs &amp; NLP.</dd>
 
-            <dt>Chứng chỉ &amp; Ngoại ngữ</dt>
-            <dd><b>TOEIC 4 kỹ năng (ETS, 08/2025):</b> 825/990 L&amp;R · 270/400 S&amp;W · <b>DevOps Beginners to Advanced with Projects</b> &amp; <b>DevOps On AWS Beginner</b> (Udemy).</dd>
+            <dt>Certifications &amp; Languages</dt>
+            <dd><b>TOEIC 4-Skills (ETS, 08/2025):</b> 825/990 Listening &amp; Reading · 270/400 Speaking &amp; Writing · <b>DevOps Beginners to Advanced with Projects</b> &amp; <b>DevOps On AWS Beginner</b> (Udemy).</dd>
           </dl>
         </div>
       </div>
 
       <footer class="academic-footer">
-        <span>© 2026 Vũ Đình Ngọc Bảo · HCMUS · Nền 3D Voxel Vintage River</span>
-        <a href="#about">↑ Lên đầu trang</a>
+        <span>© 2026 Vu Dinh Ngoc Bao · HCMUS · Living 3D Minecraft Shader &amp; Knowledge Graph</span>
+        <a href="#about">↑ Back to top</a>
       </footer>
     </section>
 
   </main>
 
-  <!-- Trang chi tiết paper (Modal nền trắng trang nhã) -->
+  <!-- Paper Detail Modal -->
   <div id="modal" class="modal" hidden>
     <article class="sheet" role="dialog" aria-modal="true" aria-labelledby="p-title">
       <header class="sheet-head">
@@ -451,15 +453,15 @@
           <h2 id="p-title"></h2>
           <div id="p-tags" class="tags"></div>
         </div>
-        <button id="p-close" class="btn-ghost" type="button" aria-label="Đóng">✕ Đóng</button>
+        <button id="p-close" class="btn-ghost" type="button" aria-label="Close">✕ Close</button>
       </header>
       <p id="p-abstract" class="abstract"></p>
       <nav id="p-links" class="links"></nav>
 
       <div class="tabs" role="tablist">
-        <button class="tab on" data-tab="pdf" role="tab" type="button">Bản toàn văn (PDF)</button>
-        <button class="tab" data-tab="readme" role="tab" type="button">Tài liệu (README)</button>
-        <button class="tab" data-tab="comments" role="tab" type="button">Thảo luận <i id="c-count"></i></button>
+        <button class="tab on" data-tab="pdf" role="tab" type="button">Full Paper (PDF)</button>
+        <button class="tab" data-tab="readme" role="tab" type="button">Documentation (README)</button>
+        <button class="tab" data-tab="comments" role="tab" type="button">Discussion <i id="c-count"></i></button>
       </div>
 
       <section id="tab-pdf" class="pane"></section>
@@ -467,32 +469,32 @@
       <section id="tab-comments" class="pane" hidden>
         <ul id="c-list" class="comments"></ul>
         <form id="c-form" class="c-form" hidden>
-          <p id="c-replying" class="replying" hidden><span id="c-replying-to"></span> <button id="c-replying-x" class="btn-ghost" type="button" aria-label="Huỷ trả lời">✕</button></p>
-          <textarea id="c-body" maxlength="1000" rows="3" placeholder="Viết bình luận hoặc câu hỏi thảo luận học thuật (tối đa 1000 ký tự)"></textarea>
-          <button class="btn primary" type="submit">Gửi bình luận</button>
+          <p id="c-replying" class="replying" hidden><span id="c-replying-to"></span> <button id="c-replying-x" class="btn-ghost" type="button" aria-label="Cancel reply">✕</button></p>
+          <textarea id="c-body" maxlength="1000" rows="3" placeholder="Write a comment or academic discussion question (max 1000 chars)"></textarea>
+          <button class="btn primary" type="submit">Post Comment</button>
         </form>
-        <p id="c-login" class="muted" hidden>Đăng nhập GitHub để tham gia thảo luận.</p>
+        <p id="c-login" class="muted" hidden>Sign in with GitHub to join the discussion.</p>
       </section>
 
       <footer id="p-admin" class="admin" hidden>
-        <label class="btn-ghost">Tải PDF lên<input id="p-file" type="file" accept="application/pdf" hidden></label>
-        <button id="p-delete" class="btn danger" type="button">Xoá paper</button>
+        <label class="btn-ghost">Upload PDF<input id="p-file" type="file" accept="application/pdf" hidden></label>
+        <button id="p-delete" class="btn danger" type="button">Delete Paper</button>
       </footer>
     </article>
   </div>
 
-  <!-- Form tạo paper (admin) -->
+  <!-- Create Paper Modal (Admin) -->
   <div id="modal-new" class="modal" hidden>
     <form id="new-form" class="sheet narrow">
-      <header class="sheet-head"><h2>Thêm Công bố / Paper mới</h2><button type="button" id="n-close" class="btn-ghost" aria-label="Đóng">✕</button></header>
-      <label>Tiêu đề công bố<input name="title" required maxlength="200"></label>
-      <label>Tóm tắt (Abstract)<textarea name="abstract" rows="4" maxlength="4000"></textarea></label>
-      <label>Từ khoá / Tag (cách nhau bằng dấu phẩy)<input name="tags"></label>
-      <label>Repo GitHub<input name="repo_url" placeholder="https://github.com/owner/repo"></label>
-      <label>Video thuyết trình (https)<input name="video_url" placeholder="https://..."></label>
-      <label>Trang Demo (https)<input name="demo_url" placeholder="https://..."></label>
+      <header class="sheet-head"><h2>Add New Publication / Paper</h2><button type="button" id="n-close" class="btn-ghost" aria-label="Close">✕</button></header>
+      <label>Title<input name="title" required maxlength="200"></label>
+      <label>Abstract<textarea name="abstract" rows="4" maxlength="4000"></textarea></label>
+      <label>Keywords / Tags (comma-separated)<input name="tags"></label>
+      <label>GitHub Repository<input name="repo_url" placeholder="https://github.com/owner/repo"></label>
+      <label>Presentation Video (https)<input name="video_url" placeholder="https://..."></label>
+      <label>Live Demo (https)<input name="demo_url" placeholder="https://..."></label>
       <p id="n-error" class="error" hidden></p>
-      <button class="btn primary" type="submit">Tạo công bố</button>
+      <button class="btn primary" type="submit">Create Publication</button>
     </form>
   </div>
 

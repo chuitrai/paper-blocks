@@ -1,6 +1,6 @@
-// Điều phối giao diện Portfolio Học thuật & Kỹ thuật trên nền 3D Voxel Vintage.
-// Quy tắc an toàn: nội dung do người dùng nhập (tiêu đề, tóm tắt, README, comment)
-// chỉ được đưa vào trang bằng textContent / createTextNode, KHÔNG BAO GIỜ bằng innerHTML.
+// Academic & Engineering Portfolio UI Controller (Living 3D Minecraft Shader & Knowledge Graph).
+// Security invariant: user-provided content (title, abstract, README, comment)
+// is always rendered via textContent / createTextNode, NEVER via innerHTML.
 import { api, ApiError, session, consumeLoginFragment } from "./api.js";
 import { createWorld } from "./world.js";
 
@@ -30,10 +30,10 @@ function toast(msg, isErr = false) {
 }
 
 function explain(e) {
-  if (!(e instanceof ApiError)) return "Không kết nối được máy chủ";
-  if (e.status === 403) return e.reason === "expired" ? "Phiên đã hết hạn, hãy đăng nhập lại" : "Bạn không có quyền thực hiện thao tác này";
-  if (e.status === 409 && e.reason === undefined && /rate|limit|many/i.test(e.message)) return "Bạn thao tác quá nhanh, thử lại sau một phút";
-  return e.message || "Có lỗi xảy ra";
+  if (!(e instanceof ApiError)) return "Could not connect to server";
+  if (e.status === 403) return e.reason === "expired" ? "Session expired, please sign in again" : "You do not have permission for this action";
+  if (e.status === 409 && e.reason === undefined && /rate|limit|many/i.test(e.message)) return "Too many requests, please wait a minute";
+  return e.message || "An error occurred";
 }
 
 const STATIC_PAPERS = [
@@ -41,8 +41,8 @@ const STATIC_PAPERS = [
     id: 1,
     title: "Graph-Derived Controls for Patient Identifier Leakage in Medical Graph RAG",
     abstract:
-      "Tác giả: Dinh Ngoc Bao Vu, Ngoc Duy My Nguyen, Mai-Khiem Tran, Minh-Hoang Le, Minh-Triet Tran (HCMUS · ACIIDS 2027). Nghiên cứu rò rỉ định danh bệnh nhân (PII) trên LightRAG và plain RAG với hội thoại y khoa HealthCareMagic. Đề xuất bộ lọc ngữ cảnh từ chính đồ thị (P2q: giảm rò rỉ tên từ 35.0%/66.2% xuống 1.2% không cần model tại query time) và cơ chế cắt tỉa theo nguồn gốc + băm ID theo từng truy vấn (P4: đưa liên kết chẩn đoán-bệnh nhân về 0%).",
-    tags: ["Graph RAG", "Privacy-preserving AI", "PII Leakage", "ACIIDS 2027"],
+      "Authors: Dinh Ngoc Bao Vu, Ngoc Duy My Nguyen, Mai-Khiem Tran, Minh-Hoang Le, Minh-Triet Tran (University of Science, VNU-HCM · Submitted to ACIIDS 2027). We plant synthetic patients in HealthCareMagic dialogues, index them with LightRAG and plain RAG, and trace each identifier from the graph to the answers. P2q masks names with a dictionary built from the graph's person nodes (lowering patient-naming leakage from 35.0%/66.2% to 1.2% with no detection model at query time), and P4 drops the named person's source documents via person-to-source links and hashes IDs per query (reducing patient-diagnosis linkage and cited-ID join attacks to 0%).",
+    tags: ["Graph RAG", "Privacy-Preserving AI", "PII Leakage", "ACIIDS 2027"],
     thumb_url: "./assets/graphrag-overview.png",
     pdf_url: "./papers/ACIIDS_2027_Patient_Identifier_Leakage_Graph_RAG.pdf",
     has_pdf: true,
@@ -53,7 +53,7 @@ const STATIC_PAPERS = [
     id: 2,
     title: "Measuring Egress-Allowlist Reachability in GitHub Actions from Multi-Source CI Data",
     abstract:
-      "Tác giả: Dinh Ngoc Bao Vu, Van-Linh Nguyen (HCMUS & National Chung Cheng University, Taiwan · IEEE ICC 2027 SAC-BigData). Thu thập 7,137 egress allowlists trên 1,358 repo GitHub Actions dùng Harden-Runner, kết hợp dữ liệu workflow, sở hữu IP/co-tenancy và log chạy CI. Chỉ ra 56.7% allowlist chứa đích dùng chung IP hoặc dịch vụ exfiltration; siết tĩnh giảm xuống 25.0% nhưng làm hỏng 98.4% repo; phát hiện lỗi chọn nhầm run log (45.9% -> 15.5%) và suy giảm âm thầm (6.4%).",
+      "Authors: Dinh Ngoc Bao Vu, Van-Linh Nguyen (University of Science, VNU-HCM & National Chung Cheng University, Taiwan · Submitted to IEEE ICC 2027 SAC-BigData). From 1,358 public GitHub Actions repositories using Harden-Runner we collected 7,137 enforcing allowlists and joined workflow rules, IP co-tenancy/abuse reference data, and public CI DNS run logs. We show that 56.7% of allowlists admit a co-tenant or exfiltration destination, static tightening reduces this to 25.0% but drops a required host in 98.4% of builds, and public CI logs suffer from run misattribution (45.9% -> 15.5%) and silent degradation (6.4%).",
     tags: ["CI/CD Security", "GitHub Actions", "Egress Filtering", "IEEE ICC 2027"],
     repo_url: "https://github.com/chuitrai/EgressGap",
     thumb_url: "./assets/egressgap-overview.png",
@@ -66,7 +66,7 @@ const STATIC_PAPERS = [
     id: 3,
     title: "Cloud-Native Application Deployment & Observability Platform (Viettel Digital Talent)",
     abstract:
-      "Thiết kế đường ống CI/CD và GitOps cho kiến trúc microservices: tự động dựng cụm Kubernetes (Kubeadm, Vagrant, Ansible), build/deploy qua Jenkins, Helm & ArgoCD, giám sát Prometheus + Grafana và tập trung log với EFK Stack.",
+      "Production-grade CI/CD and GitOps platform for microservices: automated Kubernetes cluster provisioning with Kubeadm, Vagrant, and Ansible; Jenkins CI pipelines; multi-source Helm + ArgoCD GitOps delivery; and end-to-end observability with Prometheus, Grafana, and the EFK Stack.",
     tags: ["Kubernetes", "Helm", "ArgoCD", "Observability"],
     repo_url: "https://github.com/chuitrai/VDT_Final_Project",
     has_pdf: false,
@@ -75,9 +75,9 @@ const STATIC_PAPERS = [
   },
   {
     id: 4,
-    title: "AquaSafe: Flood Map with Severity Levels and Prediction (Data For Life 2025)",
+    title: "AquaSafe: Interactive Flood Severity Map & Real-Time Prediction (Data For Life 2025)",
     abstract:
-      "Hệ thống bản đồ web hiển thị mức độ ngập lụt và cảnh báo dự báo theo thời gian thực. Đạt Giải Triển vọng (Promising Award — Top 30 / 2.600+ đội thi) tại cuộc thi quốc tế Data For Life 2025 do Bộ Công An tổ chức.",
+      "Web-based geospatial mapping platform visualizing real-time flood severity levels and predictive safety alerts. Won the Promising Award (Top 30 out of 2,600+ teams) at the Data For Life 2025 international competition organized by the Ministry of Public Security.",
     tags: ["Web Map", "Data For Life 2025", "React", "AI Prediction"],
     repo_url: "https://github.com/chuitrai/AquaSafe_FE",
     has_pdf: false,
@@ -88,7 +88,7 @@ const STATIC_PAPERS = [
     id: 5,
     title: "Multimodal Image & Text Query System for Large-Scale Video Dataset (AI Challenge 2024)",
     abstract:
-      "Hệ thống truy vấn sự kiện video quy mô lớn bằng văn bản hoặc hình ảnh sử dụng TransNet để trích xuất keyframe, FAISS để tìm kiếm vector tốc độ cao và giao diện Streamlit. Lọt vào Vòng Chung kết (Finalist) AI Challenge TP.HCM 2024.",
+      "Large-scale video event retrieval system supporting text and image queries using TransNet for keyframe extraction, FAISS for high-speed vector indexing, and a Streamlit UI. Reached the Final Round (Finalist) of The 5th AI Challenge Ho Chi Minh City 2024.",
     tags: ["AI Vision", "TransNet", "FAISS", "Python"],
     repo_url: "https://github.com/chuitrai/AIC_Challenge",
     has_pdf: false,
@@ -97,10 +97,10 @@ const STATIC_PAPERS = [
   },
   {
     id: 6,
-    title: "Paper Blocks: Research Portfolio & Fast-Lane CI/CD Platform",
+    title: "Paper Blocks: Academic Research Portfolio & GitOps Platform",
     abstract:
-      "Nền tảng trình bày công trình nghiên cứu học thuật kết hợp nền 3D Voxel Shader (Three.js), backend Go 1.24 + SQLite WAL, Helm Chart multi-source với ArgoCD GitOps.",
-    tags: ["Go", "WebGL", "Helm", "ArgoCD"],
+      "Scholarly portfolio and research publication platform built with Go 1.24, SQLite WAL, GitHub OAuth 2.0 PKCE, multi-source Helm + ArgoCD GitOps, and a 60fps interactive Minecraft Shader & Knowledge Graph canvas.",
+    tags: ["Go", "Helm", "ArgoCD", "Knowledge Graph"],
     repo_url: "https://github.com/chuitrai/paper-blocks",
     has_pdf: false,
     views: 62,
@@ -110,7 +110,7 @@ const STATIC_PAPERS = [
     id: 7,
     title: "High-Performance HTTP/HTTPS Proxy Server from Scratch in C++",
     abstract:
-      "Thiết kế và cài đặt Proxy Server hiệu năng cao từ đầu bằng C++ (Windows API, Socket Programming), hỗ trợ định tuyến HTTP/HTTPS, lọc website theo domain/IP và ghi nhật ký truy cập.",
+      "Designed and implemented a multithreaded HTTP/HTTPS proxy server from scratch in C++ (Windows API, Socket Programming) supporting request routing, domain/IP filtering, and user activity logging.",
     tags: ["C++", "Networking", "HTTP/HTTPS", "Security"],
     repo_url: "https://github.com/chuitrai/Proxy_server",
     has_pdf: false,
@@ -129,7 +129,6 @@ const state = {
   replyTo: null,
 };
 
-// ----- URL ngoài: chỉ cho https, hiển thị tên miền, mở tab mới không rò referrer -----
 function safeLink(label, raw) {
   let u;
   try {
@@ -149,7 +148,6 @@ function shortName(user) {
   return user.startsWith("gh:") ? user.slice(3) : user;
 }
 
-// ----- thanh trên cùng -----
 function renderAuth() {
   const s = session.get();
   const logged = !!(s && state.me);
@@ -172,13 +170,12 @@ async function loadMe() {
     try {
       state.me = await api("/me");
     } catch {
-      /* token hỏng: api() đã tự xoá phiên nếu hết hạn */
+      /* expired token cleared automatically by api() */
     }
   }
   renderAuth();
 }
 
-// ----- danh sách công bố khoa học + thế giới -----
 let world;
 async function loadPapers() {
   try {
@@ -229,7 +226,7 @@ async function renderList() {
     list.append(
       h("li", {
         class: "empty",
-        text: filtered ? "Không có công bố nào khớp từ khoá." : "Chưa có công bố nào." + (state.me?.role === "admin" ? " Bấm “+ Thêm Paper” để tạo." : ""),
+        text: filtered ? "No publications match your filter." : "No publications yet." + (state.me?.role === "admin" ? " Click “+ New Paper” to add one." : ""),
       })
     );
     return;
@@ -246,7 +243,7 @@ async function renderList() {
     const tags = h("div", { class: "tags" }, ...(p.tags || []).map((t) => h("span", { text: t })));
     const meta = h("small", {
       class: "meta",
-      text: `[Xem toàn văn & Thảo luận] · ${p.views} lượt đọc · ${p.comment_count} bình luận`,
+      text: `[Full Paper & Details] · ${p.views} views · ${p.comment_count} comments`,
     });
     const mainCol = h(
       "div",
@@ -293,12 +290,12 @@ async function loadTags() {
 
 async function loadStats() {
   if (state.staticMode) {
-    $("stats").textContent = `${state.all.length} công bố & dự án nghiên cứu`;
+    $("stats").textContent = `${state.all.length} publications & technical reports`;
     return;
   }
   try {
     const s = await api("/stats");
-    $("stats").textContent = `${s.papers} công bố · ${s.comments} thảo luận · ${s.views} lượt đọc`;
+    $("stats").textContent = `${s.papers} papers · ${s.comments} comments · ${s.views} views`;
   } catch {
     $("stats").textContent = "";
   }
@@ -313,7 +310,6 @@ $("q").addEventListener("input", (e) => {
   }, 300);
 });
 
-// ----- chi tiết paper -----
 const tabs = ["pdf", "readme", "comments"];
 function showTab(name) {
   for (const t of tabs) {
@@ -361,7 +357,7 @@ async function openPaper(id) {
   } else if (p.has_pdf) {
     pdf.append(h("iframe", { src: `/api/v1/papers/${p.id}/file`, title: "PDF: " + p.title }));
   } else {
-    pdf.append(h("p", { class: "muted", text: "Paper này chưa có file PDF." }));
+    pdf.append(h("p", { class: "muted", text: "No PDF attached for this report yet (see GitHub repository above)." }));
   }
   $("tab-readme").replaceChildren();
   $("c-list").replaceChildren();
@@ -386,34 +382,48 @@ async function loadReadme() {
   const box = $("tab-readme");
   if (!p || box.childElementCount) return;
   if (!p.repo_url) {
-    box.append(h("p", { class: "muted", text: "Paper này chưa gắn repo GitHub." }));
+    box.append(h("p", { class: "muted", text: "No GitHub repository linked to this paper." }));
     return;
   }
-  box.append(h("p", { class: "muted", text: "Đang tải README..." }));
+  if (state.staticMode) {
+    box.append(
+      h("p", {
+        class: "muted",
+        text: `Open the GitHub repository (${p.repo_url}) above to browse full source code and README.`,
+      })
+    );
+    return;
+  }
+  box.append(h("p", { class: "muted", text: "Loading README..." }));
   try {
     const r = await api(`/papers/${p.id}/readme`);
     box.replaceChildren(h("pre", { class: "readme", text: r.markdown }));
-    if (r.truncated) box.append(h("p", { class: "muted", text: "(README quá dài, đã cắt bớt)" }));
+    if (r.truncated) box.append(h("p", { class: "muted", text: "(README truncated due to length)" }));
   } catch (e) {
-    box.replaceChildren(h("p", { class: "muted", text: e.status === 404 ? "Repo không có README." : "Chưa lấy được README từ GitHub, thử lại sau." }));
+    box.replaceChildren(h("p", { class: "muted", text: e.status === 404 ? "Repository has no README." : "Could not fetch README from GitHub, please try again later." }));
   }
 }
 
 function fmtTime(iso) {
   const d = new Date(iso);
-  return isNaN(d) ? "" : d.toLocaleString("vi-VN");
+  return isNaN(d) ? "" : d.toLocaleString("en-US");
 }
 
 async function loadComments() {
   const p = state.current;
   if (!p) return;
+  if (state.staticMode) {
+    const ul = $("c-list");
+    ul.replaceChildren(h("li", { class: "muted", text: "Interactive comments are enabled when connected to the Go API server." }));
+    return;
+  }
   try {
     const { comments } = await api(`/papers/${p.id}/comments`);
     if (state.current?.id !== p.id) return;
     $("c-count").textContent = comments.length ? `(${comments.length})` : "";
     const ul = $("c-list");
     ul.replaceChildren();
-    if (!comments.length) ul.append(h("li", { class: "muted", text: "Chưa có bình luận." }));
+    if (!comments.length) ul.append(h("li", { class: "muted", text: "No comments yet." }));
     const roots = comments.filter((c) => !c.parent_id);
     for (const root of roots) {
       ul.append(commentRow(root, false));
@@ -430,19 +440,19 @@ function commentRow(c, isReply) {
   const canDelete = state.me && (state.me.role === "admin" || mine);
   const bodyEl = h("p", { class: "body", text: c.body });
   const head = h("div", {}, h("b", { text: shortName(c.author) }), h("time", { text: fmtTime(c.created_at) }));
-  if (c.edited_at) head.append(h("em", { text: "(đã sửa)" }));
+  if (c.edited_at) head.append(h("em", { text: "(edited)" }));
   const main = h("div", {}, head, bodyEl);
 
   const actions = h("div", { class: "actions" });
-  if (state.me && !isReply) actions.append(h("button", { class: "btn-ghost", type: "button", text: "Trả lời", onclick: () => setReply(c) }));
-  if (mine) actions.append(h("button", { class: "btn-ghost", type: "button", text: "Sửa", onclick: () => startEdit(c, main, bodyEl, actions) }));
-  if (canDelete) actions.append(h("button", { class: "btn danger", type: "button", text: "Xoá", onclick: () => removeComment(c.id) }));
+  if (state.me && !isReply) actions.append(h("button", { class: "btn-ghost", type: "button", text: "Reply", onclick: () => setReply(c) }));
+  if (mine) actions.append(h("button", { class: "btn-ghost", type: "button", text: "Edit", onclick: () => startEdit(c, main, bodyEl, actions) }));
+  if (canDelete) actions.append(h("button", { class: "btn danger", type: "button", text: "Delete", onclick: () => removeComment(c.id) }));
   return h("li", { class: isReply ? "reply" : "" }, src ? h("img", { src, alt: "" }) : h("span"), main, actions);
 }
 
 function setReply(c) {
   state.replyTo = c;
-  $("c-replying-to").textContent = "Đang trả lời " + shortName(c.author);
+  $("c-replying-to").textContent = "Replying to " + shortName(c.author);
   $("c-replying").hidden = false;
   $("c-body").focus();
 }
@@ -455,8 +465,8 @@ $("c-replying-x").addEventListener("click", clearReply);
 function startEdit(c, main, bodyEl, actions) {
   const ta = h("textarea", { maxlength: "1000", rows: "3" });
   ta.value = c.body;
-  const save = h("button", { class: "btn primary", type: "button", text: "Lưu" });
-  const cancel = h("button", { class: "btn-ghost", type: "button", text: "Huỷ", onclick: loadComments });
+  const save = h("button", { class: "btn primary", type: "button", text: "Save" });
+  const cancel = h("button", { class: "btn-ghost", type: "button", text: "Cancel", onclick: loadComments });
   save.addEventListener("click", async () => {
     const body = ta.value.trim();
     if (!body) return;
@@ -464,7 +474,7 @@ function startEdit(c, main, bodyEl, actions) {
       await api("/comments/" + c.id, { method: "PATCH", json: { body } });
       loadComments();
     } catch (err) {
-      toast(err instanceof ApiError && err.status === 409 ? "Bạn thao tác quá nhanh, đợi một phút rồi thử lại" : explain(err), true);
+      toast(err instanceof ApiError && err.status === 409 ? "Too many requests, please wait a minute" : explain(err), true);
     }
   });
   bodyEl.replaceWith(ta);
@@ -484,7 +494,6 @@ async function removeComment(id) {
   }
 }
 
-// ----- sự kiện Modal & Form -----
 $("p-close").addEventListener("click", closePaper);
 $("modal").addEventListener("click", (e) => e.target === $("modal") && closePaper());
 document.addEventListener("keydown", (e) => {
@@ -508,7 +517,7 @@ $("c-form").addEventListener("submit", async (e) => {
     loadComments();
     loadPapers();
   } catch (err) {
-    toast(err instanceof ApiError && err.status === 409 ? "Bạn bình luận quá nhanh, đợi một phút rồi thử lại" : explain(err), true);
+    toast(err instanceof ApiError && err.status === 409 ? "Commenting too fast, please wait a minute" : explain(err), true);
   }
 });
 
@@ -521,22 +530,22 @@ $("p-file").addEventListener("change", async (e) => {
   form.append("file", f);
   try {
     await api(`/papers/${id}/file`, { method: "POST", form });
-    toast("Đã tải PDF lên");
+    toast("PDF uploaded");
     await loadPapers();
     openPaper(id);
   } catch (err) {
-    toast(err instanceof ApiError && err.status === 413 ? "File quá lớn" : explain(err), true);
+    toast(err instanceof ApiError && err.status === 413 ? "File is too large" : explain(err), true);
   }
 });
 
 $("p-delete").addEventListener("click", async () => {
   const p = state.current;
-  if (!p || !confirm(`Xoá paper “${p.title}”? Không hoàn tác được.`)) return;
+  if (!p || !confirm(`Delete paper “${p.title}”? This cannot be undone.`)) return;
   try {
     await api("/papers/" + p.id, { method: "DELETE" });
     closePaper();
     await loadPapers();
-    toast("Đã xoá");
+    toast("Paper deleted");
   } catch (err) {
     toast(explain(err), true);
   }
@@ -563,7 +572,7 @@ $("new-form").addEventListener("submit", async (e) => {
     e.target.reset();
     $("modal-new").hidden = true;
     await loadPapers();
-    toast("Đã tạo. Mở paper để tải PDF lên.");
+    toast("Created. Open the paper to upload a PDF.");
     openPaper(p.id);
   } catch (err) {
     $("n-error").textContent = explain(err);
@@ -575,37 +584,37 @@ $("btn-logout").addEventListener("click", async () => {
   session.clear();
   await loadMe();
   closePaper();
-  toast("Đã đăng xuất");
+  toast("Signed out");
 });
 window.addEventListener("session-changed", async () => {
   await loadMe();
-  toast("Phiên đã hết hạn, hãy đăng nhập lại", true);
+  toast("Session expired, please sign in again", true);
 });
 
-// Nút đổi giao diện nền Đồ thị Tri thức (Research Slate / Twilight / Cyber Midnight)
+// Switch Shader Lighting Theme (Daylight / Sunset / Firefly Night)
 $("btn-time")?.addEventListener("click", () => {
   if (!world?.cycleTimeMode) return;
   const mode = world.cycleTimeMode();
-  const labels = ["🌌 Nền: Research Slate", "🌇 Nền: Twilight", "🌙 Nền: Cyber Matrix"];
-  $("btn-time").textContent = labels[mode] || "🌌 Đổi nền";
+  const labels = ["🌌 Theme: Daylight", "🌇 Theme: Sunset", "🌙 Theme: Firefly Night"];
+  $("btn-time").textContent = labels[mode] || "🌌 Theme";
 });
 
-// Nút Ngắm Đồ thị Tri thức Tương tác
+// Toggle Interactive World View
 function toggleScenicMode(force) {
   const isScenic = typeof force === "boolean" ? force : !document.body.classList.contains("scenic-mode");
   document.body.classList.toggle("scenic-mode", isScenic);
   const btn = $("btn-scenic");
   if (btn) {
-    btn.textContent = isScenic ? "📋 Hiện Portfolio" : "🕸️ Ngắm Đồ thị";
+    btn.textContent = isScenic ? "📋 Show Portfolio" : "🕸️ World View";
   }
   if (isScenic) {
-    toast("Di chuột hoặc click để tương tác với Đồ thị Tri thức (Bấm Esc hoặc nút trên menu để hiện lại)");
+    toast("Move or click to interact with the Minecraft Shader World & Knowledge Graph (Press Esc to return)");
   }
 }
 
 $("btn-scenic")?.addEventListener("click", () => toggleScenicMode());
 
-// Bộ lọc tab khu vực Hoạt động / Sự kiện / Vlog
+// Activity / Competition / Vlog Filter Pills
 document.querySelectorAll(".f-pill").forEach((btn) => {
   btn.addEventListener("click", () => {
     const filter = btn.dataset.media;
@@ -616,7 +625,6 @@ document.querySelectorAll(".f-pill").forEach((btn) => {
   });
 });
 
-// Hiệu ứng xuất hiện khi cuộn
 function setupScrollAnimations() {
   const sections = document.querySelectorAll(".frosted-section");
   const navLinks = document.querySelectorAll(".nav-links a");
@@ -651,7 +659,6 @@ function setupScrollAnimations() {
   }
 }
 
-// ----- khởi động -----
 async function boot() {
   setupScrollAnimations();
 
@@ -663,7 +670,7 @@ async function boot() {
   }
 
   const login = consumeLoginFragment();
-  if (login?.error) toast("Đăng nhập GitHub thất bại: " + login.error, true);
+  if (login?.error) toast("GitHub sign-in failed: " + login.error, true);
 
   try {
     state.methods = await api("/auth/methods");
@@ -671,7 +678,7 @@ async function boot() {
     state.methods = { github: false, password: false };
   }
   await loadMe();
-  if (login?.loggedIn && state.me) toast("Xin chào " + shortName(state.me.user));
+  if (login?.loggedIn && state.me) toast("Welcome " + shortName(state.me.user));
 
   api("/status")
     .then((s) => {
