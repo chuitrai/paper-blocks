@@ -1,0 +1,42 @@
+controller:
+  # Chạy vừa trên worker 6-8GB
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+    limits:
+      cpu: "1000m"
+      memory: "1536Mi"
+
+  # BẮT BUỘC đặt -Xmx nhỏ hơn limits.memory để tránh JVM bị OOMKilled
+  javaOpts: "-Xms512m -Xmx1024m -Djenkins.install.runSetupWizard=false"
+
+  serviceType: NodePort
+  nodePort: 30082
+
+  # Tự cài các plugin tối thiểu cho CI/CD K8s
+  installPlugins:
+    - kubernetes:latest
+    - git:latest
+    - configuration-as-code:latest
+    - pipeline-stage-view:latest
+
+  # Cho phép agent kết nối qua WebSocket (ổn định hơn qua Service/NodePort)
+  JCasC:
+    defaultConfig: true
+
+persistence:
+  enabled: true
+  storageClass: "local-path"
+  size: "8Gi"
+
+# Agent mặc định chạy nhẹ khi test kết nối
+agent:
+  enabled: true
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
